@@ -1,0 +1,21 @@
+{
+	"name": "async-react-router",
+	"version": "0.1.0",
+	"description": "An http server for React Router Applications.",
+	"author": "Nick Heyn <nick@heyn.io>",
+	"main": "lib/index.js",
+	"dependencies": {
+		"react": "*",
+		"react-router": "*",
+		"babel": "*"
+	},
+	"devDependencies": {
+		"babel-jest": "*",
+		"jest-cli": "*"
+	},
+	"scripts": {
+		"test": "jest",
+		"prepublish": "babel ./src/ -d ./lib/"
+	},
+	"license": "MIT"
+}

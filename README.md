@@ -5,7 +5,7 @@
 TODO: Make usage
 
 ###Example
-TODO: Make example
+TODO: Update expample, currently set up to use async-react-router.http, to user react-router-server
 
 ###Tests
 TODO: Write the tests

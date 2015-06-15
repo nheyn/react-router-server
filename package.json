@@ -17,5 +17,10 @@
 		"test": "jest",
 		"prepublish": "babel ./src/ -d ./lib/"
 	},
+	"jest": {
+		"scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+		"setupEnvScriptFile": "<rootDir>/__tests__/jestEnvironment.js",
+		"unmockedModulePathPatterns": ["core-js/.*"]
+	},
 	"license": "MIT"
 }

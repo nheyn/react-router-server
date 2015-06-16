@@ -1,6 +1,7 @@
 /**
  * @flow
  */
+var React = require('react');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- RouteParser ---
@@ -20,14 +21,21 @@ class RouteParser {
 		this._route = route;
 	}
 
+/*------------------------------------------------------------------------------------------------*/
+//	--- Private Method ---
+/*------------------------------------------------------------------------------------------------*/
 	/**
 	 * Gets the react router route without any of the http handler routes.
 	 *
 	 * @return	{ReactRouterRoute}	The route with out http handlers
 	 */
 	getReactRouterRoute(): ReactRouterRoute {
-		//TODO, remove stuff
-		return this._route;
+		var newChildern = [];
+		React.Children.forEach((child) => {
+			if(!child.isApiHandler && !child.isStaticFileHandler) newChildern.push(child);
+		});
+
+		return React.cloneElement(this._route, null, newChildern);
 	}
 
 	/**
@@ -40,8 +48,43 @@ class RouteParser {
 	 *																router	{ExpressRouter}	
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
+		return [].concat(
+			this._getRoutesWithApiHandlers.map((route) => {
+				return {
+					path: route.path,
+					type: 'api',
+					router: this._makeApiRouterFrom(route)
+				};
+			}),
+			this._getRoutesWithStaticFileHandlers.map((route) => {
+				return {
+					path: route.path,
+					type: 'file',
+					router: this._makeStaticFileRouterFrom(route)
+				};
+			}),	
+		);
+	}
+
+/*------------------------------------------------------------------------------------------------*/
+//	--- Private Method ---
+/*------------------------------------------------------------------------------------------------*/
+	_getRoutesWithApiHandlers(): Array<ReactRouterRoute> {
 		//TODO
 		return [];
+	}
+
+	_getRoutesWithStaticFileHandlers(): Array<ReactRouterRoute> {
+		//TODO
+		return [];
+	}
+
+	_makeApiRouterFrom(apiRoute: ReactRouterRoute): ExpressRouter {
+		return {};
+	}
+
+	_makeStaticFileRouterFrom(statifFileRoute: ReactRouterRoute): ExpressRouter {
+		return {};
 	}
 }
 

@@ -1,12 +1,16 @@
+var React = require.requireActual('react');
+
 describe('RouteParser' () => {
-	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {	
+	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
+		//TODO, make multi level tests
+		
 		it('can get route without api and static file handlers', () => {
 			var route = getRoute();
 			var routeParser = createRouteParser(route);
 
 			var checkRoutes = (filteredRoutes) => {
 				filteredRoutes.forEach((filteredRoute) => {
-					if(filteredRoute.props.children) checkRoutes(filteredRoute.props.children);
+					//if(filteredRoute.props.children) checkRoutes(filteredRoute.props.children);
 
 					var Handler = filteredRoute.props.handler;
 					expect(Handler.isApiHandler).toBeFalsy();
@@ -35,39 +39,96 @@ describe('RouteParser' () => {
 					expect(staticFileHandlers.keys()).toContain(router.path);
 				}
 				else {
-					expect(router.type).toBe('api');
-					// OR
-					expect(router.type).toBe('staticFile');
+					expect(router.type).toBe('api OR staticFile');
 				}
 			});
 		});
 	};
 
 	describe('when empty' () => {
-		tests(() => null, () => null, new Map(), new Map());
+		tests(makeGetRouteFunction(), getRouteParser, new Map(), new Map());
 	});
 
 	describe('when has only react handlers' => {
-		tests(() => null, () => null, new Map(), new Map());
+		var reactHandlers = getReactHandlers();
+		tests(
+			makeGetRouteFunction(reactHandlers), 
+			getRouteParser,
+			new Map(), 
+			new Map()
+		);
 	});
 
 	describe('when has api handlers' => {
-		tests(() => null, () => null, new Map(), new Map());
+		var apiHandlers = getApiHandlers();
+		tests(
+			makeGetRouteFunction(null, apiHandlers),
+			getRouteParser,
+			apiHandlers,
+			new Map()
+		);
 	});
 
 	describe('when has static file handlers' => {
-		tests(() => null, () => null, new Map(), new Map());
+		var staticFileHandlers = getStaticApiHandlers();
+		tests(
+			makeGetRouteFunction(null, null, staticFileHandlers),
+			getRouteParser,
+			new Map(),
+			staticFileHandlers
+		);
 	});
 
-	describe('when has api handlers and static file handlers' => {
-		tests(() => null, () => null, new Map(), new Map());
+	describe('when has api handlers and static file handlers (no react handlers)' => {
+		var apiHandlers = getApiHandlers();
+		var staticFileHandlers = getStaticApiHandlers();
+		tests(
+			makeGetRouteFunction(null, apiHandlers, staticFileHandlers), 
+			getRouteParser, 
+			apiHandlers, 
+			staticFileHandlers
+		);
 	});
 
-	describe('when has api handlers and static file handlers' => {
-		tests(() => null, () => null, new Map(), new Map());
+	describe('when has react handlers, api handlers and static file handlers' => {
+		var reactHandlers = getReactHandlers();
+		var apiHandlers = getApiHandlers();
+		var staticFileHandlers = getStaticApiHandlers();
+		tests(
+			makeGetRouteFunction(reactHandlers, apiHandlers, staticFileHandlers), 
+			getRouteParser, 
+			apiHandlers, 
+			staticFileHandlers
+		);
 	});
 });
 
 /*------------------------------------------------------------------------------------------------*/
 // Helper functions
 /*------------------------------------------------------------------------------------------------*/
+function makeGetRouteFunction(reactHandlers, apiHandlers, staticFileHandlers) {
+	return () => {
+		//TODO
+		return null;
+	}
+}
+
+function getRouteParser(route) {
+	//TODO
+	return null;
+}
+
+function getReactHandlers() {
+	//TODO
+	return new Map();
+}
+
+function getApiHandlers() {
+	//TODO
+	return new Map();
+}
+
+function getStaticApiHandlers() {
+	//TODO
+	return new Map();
+}

@@ -1,4 +1,8 @@
-var React = require.requireActual('react');
+jest.dontMock('react');
+jest.dontMock('../src/RouteParser.js');
+
+var React = require('react');
+var express = require('express');
 
 describe('RouteParser' () => {
 	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
@@ -70,7 +74,7 @@ describe('RouteParser' () => {
 	});
 
 	describe('when has static file handlers' => {
-		var staticFileHandlers = getStaticApiHandlers();
+		var staticFileHandlers = getStaticFileHandlers();
 		tests(
 			makeGetRouteFunction(null, null, staticFileHandlers),
 			getRouteParser,
@@ -81,7 +85,7 @@ describe('RouteParser' () => {
 
 	describe('when has api handlers and static file handlers (no react handlers)' => {
 		var apiHandlers = getApiHandlers();
-		var staticFileHandlers = getStaticApiHandlers();
+		var staticFileHandlers = getStaticFileHandlers();
 		tests(
 			makeGetRouteFunction(null, apiHandlers, staticFileHandlers), 
 			getRouteParser, 
@@ -93,7 +97,7 @@ describe('RouteParser' () => {
 	describe('when has react handlers, api handlers and static file handlers' => {
 		var reactHandlers = getReactHandlers();
 		var apiHandlers = getApiHandlers();
-		var staticFileHandlers = getStaticApiHandlers();
+		var staticFileHandlers = getStaticFileHandlers();
 		tests(
 			makeGetRouteFunction(reactHandlers, apiHandlers, staticFileHandlers), 
 			getRouteParser, 
@@ -108,27 +112,54 @@ describe('RouteParser' () => {
 /*------------------------------------------------------------------------------------------------*/
 function makeGetRouteFunction(reactHandlers, apiHandlers, staticFileHandlers) {
 	return () => {
-		//TODO
-		return null;
+		var handlers = [];
+		reactHandlers.forEach((handler, name) => {
+			handlers.push({ handler, name });
+		});
+		apiHandlers.forEach((handler, name) => {
+			handlers.push({ handler, name });
+		});
+		staticFileHandlers.forEach((handler, name) => {
+			handlers.push({ handler, name });
+		});
+
+		return (
+			<Route>
+				{handlers.map((handler, i) => {
+					return <Route key={i} name={handler.name} handler={handler.handler} />;
+				})}
+			</Route>
+		);
 	}
 }
 
 function getRouteParser(route) {
-	//TODO
-	return null;
+	var RouteParser = require('../src/RouteParser.js');
+	return new RouteParser(route);
 }
 
 function getReactHandlers() {
-	//TODO
-	return new Map();
+	var handlers = new Map();
+
+	for(var i=0; i<5; i++) handlers.set(`react_${i}`, <div id={i} />);
+	
+	return handlers;
 }
 
 function getApiHandlers() {
-	//TODO
-	return new Map();
+	var handlers = new Map();
+
+	for(var i=0; i<5; i++) handlers.set(`api_${i}`, routeHandler.makeApiHandler(express.Router()));
+
+	return handlers;
 }
 
-function getStaticApiHandlers() {
-	//TODO
-	return new Map();
+function getStaticFileHandlers() {
+	var handlers = new Map();
+
+	for(var i=0; i<5; i++) {
+		handlers.set(`file_${i}`, routeHandler.makeStaticFileHandlers('path/to/file_${i}.txt'));
+	}
+
+	return handlers;
 }

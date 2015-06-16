@@ -11,7 +11,6 @@ var httpRoutes = require('../src/httpRoutes.js');
 describe('RouteParser', () => {
 	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
 		//TODO, make multi level tests
-
 		it('can get route without api and static file handlers', () => {
 			var route = getRoute();
 			var routeParser = createRouteParser(route);
@@ -19,6 +18,10 @@ describe('RouteParser', () => {
 			var filteredRoute = routeParser.getReactRouterRoute();
 			expect(filteredRoute.props.handler.hasApiHandler).toBeFalsy();
 			expect(filteredRoute.props.handler.hasStaticFileHandler).toBeFalsy();
+
+			React.Children.forEach(filteredRoute.props.children, (child) => {
+				expect(child.props.name).toContain('react_');
+			});
 		});
 
 		it('creates express routes from http handlers', () => {
@@ -34,9 +37,11 @@ describe('RouteParser', () => {
 
 				if(router.type === 'api') {
 					expect(apiHandlers.keys()).toContain(router.path);
+					expect(router.path).toContain('api_');
 				}
 				else if(router.type === 'staticFile') {
 					expect(staticFileHandlers.keys()).toContain(router.path);
+					expect(router.path).toContain('file_');
 				}
 				else {
 					expect(router.type).toBe('api OR staticFile');
@@ -141,7 +146,7 @@ function getReactHandlers(count = 5) {
 	var handlers = new Map();
 
 	for(var i=0; i<count; i++) {
-		handlers.set(`react_${i}`, <div id={i} />);
+		handlers.set(`react_${i}`, 'div');
 	}
 
 	return handlers;

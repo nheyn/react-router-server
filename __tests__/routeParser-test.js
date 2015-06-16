@@ -1,13 +1,17 @@
 jest.dontMock('react');
-jest.dontMock('../src/RouteParser.js');
+jest.dontMock('../src/routeParser.js');
 
 var React = require('react');
 var express = require('express');
 
-describe('RouteParser' () => {
+describe('RouteParser', () => {
 	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
 		//TODO, make multi level tests
 		
+		it('test of tests', () => {
+			expect(apiHandlers.size).toBe(staticFileHandlers.size);
+		});
+
 		it('can get route without api and static file handlers', () => {
 			var route = getRoute();
 			var routeParser = createRouteParser(route);
@@ -49,11 +53,11 @@ describe('RouteParser' () => {
 		});
 	};
 
-	describe('when empty' () => {
+	describe('when empty', () => {
 		tests(makeGetRouteFunction(), getRouteParser, new Map(), new Map());
 	});
 
-	describe('when has only react handlers' => {
+	describe('when has only react handlers', () => {
 		var reactHandlers = getReactHandlers();
 		tests(
 			makeGetRouteFunction(reactHandlers), 
@@ -63,7 +67,7 @@ describe('RouteParser' () => {
 		);
 	});
 
-	describe('when has api handlers' => {
+	describe('when has api handlers', () => {
 		var apiHandlers = getApiHandlers();
 		tests(
 			makeGetRouteFunction(null, apiHandlers),
@@ -73,7 +77,7 @@ describe('RouteParser' () => {
 		);
 	});
 
-	describe('when has static file handlers' => {
+	describe('when has static file handlers', () => {
 		var staticFileHandlers = getStaticFileHandlers();
 		tests(
 			makeGetRouteFunction(null, null, staticFileHandlers),
@@ -83,7 +87,7 @@ describe('RouteParser' () => {
 		);
 	});
 
-	describe('when has api handlers and static file handlers (no react handlers)' => {
+	describe('when has api handlers and static file handlers (no react handlers)', () => {
 		var apiHandlers = getApiHandlers();
 		var staticFileHandlers = getStaticFileHandlers();
 		tests(
@@ -94,7 +98,7 @@ describe('RouteParser' () => {
 		);
 	});
 
-	describe('when has react handlers, api handlers and static file handlers' => {
+	describe('when has react handlers, api handlers and static file handlers', () => {
 		var reactHandlers = getReactHandlers();
 		var apiHandlers = getApiHandlers();
 		var staticFileHandlers = getStaticFileHandlers();

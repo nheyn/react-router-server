@@ -30,12 +30,9 @@ class RouteParser {
 	 * @return	{ReactRouterRoute}	The route with out http handlers
 	 */
 	getReactRouterRoute(): ReactRouterRoute {
-		var newChildern = [];
-		React.Children.forEach((child) => {
-			if(!child.isApiHandler && !child.isStaticFileHandler) newChildern.push(child);
-		});
-
-		return React.cloneElement(this._route, null, newChildern);
+		return React.cloneElement(this._route, {}, this._filterChildRoutes(
+			(route) => !hasApiHandler(route) && !hasStaticFileHandler(route)
+		));
 	}
 
 	/**
@@ -49,16 +46,16 @@ class RouteParser {
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
 		return [].concat(
-			this._getRoutesWithApiHandlers.map((route) => {
+			this._filterChildRoutes(hasApiHandler).map((route) => {
 				return {
-					path: route.path,
+					path: route.props.path,
 					type: 'api',
 					router: this._makeApiRouterFrom(route)
 				};
 			}),
-			this._getRoutesWithStaticFileHandlers.map((route) => {
+			this._filterChildRoutes(hasStaticFileHandler).map((route) => {
 				return {
-					path: route.path,
+					path: route.props.path,
 					type: 'file',
 					router: this._makeStaticFileRouterFrom(route)
 				};
@@ -69,14 +66,13 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 //	--- Private Method ---
 /*------------------------------------------------------------------------------------------------*/
-	_getRoutesWithApiHandlers(): Array<ReactRouterRoute> {
-		//TODO
-		return [];
-	}
-
-	_getRoutesWithStaticFileHandlers(): Array<ReactRouterRoute> {
-		//TODO
-		return [];
+	_filterChildRoutes(shouldKeep: (route: ReactRouterRoute) => bool): Array<ReactRouterRoute> 	{
+		var routes = [];
+		React.Children.forEach(
+			this._route.props.children, 
+			(child) => {	if(shouldKeep(child)) routes.push(child); }
+		);
+		return routes;
 	}
 
 	_makeApiRouterFrom(apiRoute: ReactRouterRoute): ExpressRouter {
@@ -86,6 +82,17 @@ class RouteParser {
 	_makeStaticFileRouterFrom(statifFileRoute: ReactRouterRoute): ExpressRouter {
 		return {};
 	}
+}
+
+/*------------------------------------------------------------------------------------------------*/
+//	--- Helper function ---
+/*------------------------------------------------------------------------------------------------*/
+function hasApiHandler(obj: any): bool {
+	return obj.hasApiHandler? true: false;
+}
+
+function hasStaticFileHandler(obj: any): bool {
+	return obj.hasStaticFileHandler? true: false;
 }
 
 /*------------------------------------------------------------------------------------------------*/

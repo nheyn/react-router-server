@@ -21,8 +21,8 @@ describe('RouteParser', () => {
 					//if(filteredRoute.props.children) checkRoutes(filteredRoute.props.children);
 
 					var Handler = filteredRoute.props.handler;
-					expect(Handler.isApiHandler).toBeFalsy();
-					expect(Handler.isStaticFileHandler).toBeFalsy();
+					expect(Handler.hasApiHandler).toBeFalsy();
+					expect(Handler.hasStaticFileHandler).toBeFalsy();
 				});
 			}
 

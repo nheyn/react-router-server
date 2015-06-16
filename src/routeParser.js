@@ -59,7 +59,7 @@ class RouteParser {
 					type: 'file',
 					router: this._makeStaticFileRouterFrom(route)
 				};
-			}),	
+			})
 		);
 	}
 
@@ -69,7 +69,7 @@ class RouteParser {
 	_filterChildRoutes(shouldKeep: (route: ReactRouterRoute) => bool): Array<ReactRouterRoute> 	{
 		var routes = [];
 		React.Children.forEach(
-			this._route.props.children, 
+			this._route.props.children,
 			(child) => {	if(shouldKeep(child)) routes.push(child); }
 		);
 		return routes;

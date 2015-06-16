@@ -1,32 +1,24 @@
-jest.dontMock('react');
 jest.dontMock('../src/routeParser.js');
 
 var React = require('react');
+var { Route } = require('react-router');
 var express = require('express');
+
+
+var RouteParser = require('../src/routeParser.js');
+var httpRoutes = require('../src/httpRoutes.js');
 
 describe('RouteParser', () => {
 	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
 		//TODO, make multi level tests
-		
-		it('test of tests', () => {
-			expect(apiHandlers.size).toBe(staticFileHandlers.size);
-		});
 
 		it('can get route without api and static file handlers', () => {
 			var route = getRoute();
 			var routeParser = createRouteParser(route);
 
-			var checkRoutes = (filteredRoutes) => {
-				filteredRoutes.forEach((filteredRoute) => {
-					//if(filteredRoute.props.children) checkRoutes(filteredRoute.props.children);
-
-					var Handler = filteredRoute.props.handler;
-					expect(Handler.hasApiHandler).toBeFalsy();
-					expect(Handler.hasStaticFileHandler).toBeFalsy();
-				});
-			}
-
-			checkRoutes(routeParser.getReactRouterRoute());
+			var filteredRoute = routeParser.getReactRouterRoute();
+			expect(filteredRoute.props.handler.hasApiHandler).toBeFalsy();
+			expect(filteredRoute.props.handler.hasStaticFileHandler).toBeFalsy();
 		});
 
 		it('creates express routes from http handlers', () => {
@@ -115,6 +107,10 @@ describe('RouteParser', () => {
 // Helper functions
 /*------------------------------------------------------------------------------------------------*/
 function makeGetRouteFunction(reactHandlers, apiHandlers, staticFileHandlers) {
+	if(!reactHandlers) 		reactHandlers = new Map();
+	if(!apiHandlers) 		apiHandlers = new Map();
+	if(!staticFileHandlers)	staticFileHandlers = new Map();
+
 	return () => {
 		var handlers = [];
 		reactHandlers.forEach((handler, name) => {
@@ -138,31 +134,40 @@ function makeGetRouteFunction(reactHandlers, apiHandlers, staticFileHandlers) {
 }
 
 function getRouteParser(route) {
-	var RouteParser = require('../src/RouteParser.js');
 	return new RouteParser(route);
 }
 
-function getReactHandlers() {
+function getReactHandlers(count = 5) {
 	var handlers = new Map();
 
-	for(var i=0; i<5; i++) handlers.set(`react_${i}`, <div id={i} />);
-	
-	return handlers;
-}
-
-function getApiHandlers() {
-	var handlers = new Map();
-
-	for(var i=0; i<5; i++) handlers.set(`api_${i}`, routeHandler.makeApiHandler(express.Router()));
+	for(var i=0; i<count; i++) {
+		handlers.set(`react_${i}`, <div id={i} />);
+	}
 
 	return handlers;
 }
 
-function getStaticFileHandlers() {
+function getApiHandlers(count = 5) {
 	var handlers = new Map();
 
-	for(var i=0; i<5; i++) {
-		handlers.set(`file_${i}`, routeHandler.makeStaticFileHandlers('path/to/file_${i}.txt'));
+	for(var i=0; i<count; i++) {
+		handlers.set(
+			`api_${i}`, 
+			httpRoutes.makeApiHandler(express.Router())
+		);
+	}
+
+	return handlers;
+}
+
+function getStaticFileHandlers(count = 5) {
+	var handlers = new Map();
+
+	for(var i=0; i<count; i++) {
+		handlers.set(
+			`file_${i}`, 
+			httpRoutes.makeStaticFileHandler('path/to/file_${i}.txt')
+		);
 	}
 
 	return handlers;

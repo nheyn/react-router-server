@@ -23,7 +23,6 @@
 		"setupEnvScriptFile": "<rootDir>/jestEnvironment.js",
 		"unmockedModulePathPatterns": [
 			"core-js/.*",
-			"react",
 			"react-router"
 		]
 	},

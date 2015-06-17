@@ -8,7 +8,9 @@ var express = require('express');
 var RouteParser = require('../src/routeParser.js');
 //var httpRoutes = require('../src/httpRoutes.js');
 
+/*------------------------------------------------------------------------------------------------*/
 // Http mock
+/*------------------------------------------------------------------------------------------------*/
 var httpRoutes = jest.genMockFromModule('../src/httpRoutes.js');
 httpRoutes.makeApiHandler = function() {
 	var Handler = function() {};
@@ -22,9 +24,23 @@ httpRoutes.makeStaticFileHandler = function() {
 	return Handler;
 };
 
+/*------------------------------------------------------------------------------------------------*/
+// React Router handler mock
+/*------------------------------------------------------------------------------------------------*/
+var MockHandler = React.createClass({
+	render() {
+		throw new Error('SHOULD NOT BE RENDERED');
+	}
+});
+
+/*------------------------------------------------------------------------------------------------*/
+// Router Parser Test
+/*------------------------------------------------------------------------------------------------*/
 describe('RouteParser', () => {
 	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
-		//TODO, make multi level tests
+		if(!apiHandlers) apiHandlers = new Map();
+		if(!staticFileHandlers) staticFileHandlers = new Map();
+
 		it('can get route without api and static file handlers', () => {
 			var route = getRoute();
 			var routeParser = createRouteParser(route);
@@ -33,9 +49,17 @@ describe('RouteParser', () => {
 			expect(filteredRoute.props.handler.hasApiHandler).toBeFalsy();
 			expect(filteredRoute.props.handler.hasStaticFileHandler).toBeFalsy();
 
-			React.Children.forEach(filteredRoute.props.children, (child) => {
-				expect(child.props.name).toContain('react_');
-			});
+			var checkAllChildrenAreReact = (children) => {
+				React.Children.forEach(children, (child) => {
+					expect(child.props.name).toContain('react_');
+
+					if(React.Children.count(child.props.children) > 0) {
+						checkAllChildrenAreReact(child.props.children);
+					}
+				});
+			};
+			
+			checkAllChildrenAreReact(filteredRoute.props.children);
 		});
 
 		it('creates express routes from http handlers', () => {
@@ -63,16 +87,14 @@ describe('RouteParser', () => {
 	};
 
 	describe('when empty', () => {
-		tests(makeGetRouteFunction(), getRouteParser, new Map(), new Map());
+		tests(makeGetRouteFunction(), getRouteParser);
 	});
 
 	describe('when has only react handlers', () => {
 		var reactHandlers = getReactHandlers();
 		tests(
 			makeGetRouteFunction(reactHandlers), 
-			getRouteParser,
-			new Map(), 
-			new Map()
+			getRouteParser
 		);
 	});
 
@@ -81,8 +103,7 @@ describe('RouteParser', () => {
 		tests(
 			makeGetRouteFunction(null, apiHandlers),
 			getRouteParser,
-			apiHandlers,
-			new Map()
+			apiHandlers
 		);
 	});
 
@@ -91,7 +112,7 @@ describe('RouteParser', () => {
 		tests(
 			makeGetRouteFunction(null, null, staticFileHandlers),
 			getRouteParser,
-			new Map(),
+			null,
 			staticFileHandlers
 		);
 	});
@@ -157,14 +178,8 @@ function getRouteParser(route) {
 function getReactHandlers(count = 5) {
 	var handlers = new Map();
 
-	var Handler = React.createClass({
-		render() {
-			return 'SHOULD NOT BE RENDERED';
-		}
-	});
-
 	for(var i=0; i<count; i++) {
-		handlers.set(`react_${i}`, Handler);
+		handlers.set(`react_${i}`, MockHandler);
 	}
 
 	return handlers;

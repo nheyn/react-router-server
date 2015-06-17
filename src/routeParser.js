@@ -48,14 +48,14 @@ class RouteParser {
 		return [].concat(
 			this._filterChildRoutes(hasApiHandler).map((route) => {
 				return {
-					path: route.props.path,
+					path: route.props.name,
 					type: 'api',
 					router: this._makeApiRouterFrom(route)
 				};
 			}),
 			this._filterChildRoutes(hasStaticFileHandler).map((route) => {
 				return {
-					path: route.props.path,
+					path: route.props.name,
 					type: 'file',
 					router: this._makeStaticFileRouterFrom(route)
 				};
@@ -87,12 +87,12 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 //	--- Helper function ---
 /*------------------------------------------------------------------------------------------------*/
-function hasApiHandler(obj: any): bool {
-	return obj.hasApiHandler? true: false;
+function hasApiHandler(route: ReactRouterRoute): bool {
+	return route.props.handler.hasApiHandler? true: false;
 }
 
-function hasStaticFileHandler(obj: any): bool {
-	return obj.hasStaticFileHandler? true: false;
+function hasStaticFileHandler(route: ReactRouterRoute): bool {
+	return route.props.handler.hasStaticFileHandler? true: false;
 }
 
 /*------------------------------------------------------------------------------------------------*/

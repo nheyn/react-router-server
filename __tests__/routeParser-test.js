@@ -6,7 +6,21 @@ var express = require('express');
 
 
 var RouteParser = require('../src/routeParser.js');
-var httpRoutes = require('../src/httpRoutes.js');
+//var httpRoutes = require('../src/httpRoutes.js');
+
+// Http mock
+var httpRoutes = jest.genMockFromModule('../src/httpRoutes.js');
+httpRoutes.makeApiHandler = function() {
+	var Handler = function() {};
+	Handler.hasApiHandler = true;
+	return Handler;
+};
+
+httpRoutes.makeStaticFileHandler = function() {
+	var Handler = function() {};
+	Handler.hasStaticFileHandler = true;
+	return Handler;
+};
 
 describe('RouteParser', () => {
 	var tests = (getRoute, createRouteParser, apiHandlers, staticFileHandlers) => {
@@ -36,12 +50,10 @@ describe('RouteParser', () => {
 														//		is correct, just if it is defined
 
 				if(router.type === 'api') {
-					expect(apiHandlers.keys()).toContain(router.path);
-					expect(router.path).toContain('api_');
+					expect(apiHandlers.has(router.path)).toBe(true);
 				}
-				else if(router.type === 'staticFile') {
-					expect(staticFileHandlers.keys()).toContain(router.path);
-					expect(router.path).toContain('file_');
+				else if(router.type === 'file') {
+					expect(staticFileHandlers.has(router.path)).toBe(true);
 				}
 				else {
 					expect(router.type).toBe('api OR staticFile');

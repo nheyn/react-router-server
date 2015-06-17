@@ -139,6 +139,134 @@ describe('RouteParser', () => {
 			staticFileHandlers
 		);
 	});
+
+	//TODO, make multi level tests
+	describe('when react handlers has sub routes', () => {
+		//TODO, update to be generated (see other test)
+		tests(
+			() => {
+				return (
+					<Route>
+						<Route name="react_0" handler={MockHandler}>
+							<Route name="react_0_0" handler={MockHandler} />
+							<Route name="react_0_1" handler={MockHandler} />
+						</Route>
+						<Route name="react_1" handler={MockHandler}>
+							<Route name="react_1_0" handler={MockHandler} />
+							<Route name="react_1_1" handler={MockHandler} />
+						</Route>
+					</Route>
+				);
+			},
+			getRouteParser
+		);
+	});
+
+	describe('when api handlers has sub routes', () => {
+		//TODO, update to be generated (see other test)
+		var makeRouterHandler = httpRoutes.makeApiHandler(express.Router());
+		var apiHandlers = new Map();
+		apiHandlers.set('api_0', makeRouterHandler());
+		apiHandlers.set('api_0/api_0_0', makeRouterHandler());
+		apiHandlers.set('api_0/api_0_1', makeRouterHandler());
+		apiHandlers.set('api_1', makeRouterHandler());
+		apiHandlers.set('api_1/api_1_0', makeRouterHandler());
+		apiHandlers.set('api_1/api_1_1', makeRouterHandler());
+
+		tests(
+			() => {
+				return (
+					<Route>
+						<Route name="api_0" handler={apiHandlers.get('api_0')}>
+							<Route name="api_0_0" handler={apiHandlers.get('api_0/api_0_0')} />
+							<Route name="api_0_1" handler={apiHandlers.get('api_0/api_0_1')} />
+						</Route>
+						<Route name="api_1" handler={apiHandlers.get('api_1')}>
+							<Route name="api_1_0" handler={apiHandlers.get('api_1/api_1_0')} />
+							<Route name="api_1_1" handler={apiHandlers.get('api_1/api_1_1')} />
+						</Route>
+					</Route>
+				);
+			},
+			getRouteParser,
+			apiHandlers
+		);
+	});
+
+	describe('when file handlers has sub routes', () => {
+		//TODO, update to be generated (see other test)
+		var makeRouterHandler = httpRoutes.makeApiHandler(express.Router());
+		var fileHandlers = new Map();
+		fileHandlers.set('file_0', makeRouterHandler());
+		fileHandlers.set('file_0/file_0_0', makeRouterHandler());
+		fileHandlers.set('file_0/file_0_1', makeRouterHandler());
+		fileHandlers.set('file_1', makeRouterHandler());
+		fileHandlers.set('file_1/file_1_0', makeRouterHandler());
+		fileHandlers.set('file_1/file_1_1', makeRouterHandler());
+
+		tests(
+			() => {
+				return (
+					<Route>
+						<Route name="file_0" handler={fileHandlers.get('file_0')}>
+							<Route name="file_0_0" handler={fileHandlers.get('file_0/file_0_0')} />
+							<Route name="file_0_1" handler={fileHandlers.get('file_0/file_0_1')} />
+						</Route>
+						<Route name="file_1" handler={fileHandlers.get('file_1')}>
+							<Route name="file_1_0" handler={fileHandlers.get('file_1/file_1_0')} />
+							<Route name="file_1_1" handler={fileHandlers.get('file_1/file_1_1')} />
+						</Route>
+					</Route>
+				);
+			},
+			getRouteParser,
+			null,
+			fileHandlers
+		);
+	});
+
+	describe('when react handlers has sub routes that are http handlers', () => {
+		//TODO, update to be generated (see other test)
+		var makeRouterHandler = httpRoutes.makeApiHandler(express.Router());
+		var apiHandlers = new Map();
+		apiHandlers.set('api_0', makeRouterHandler());
+		apiHandlers.set('api_1', makeRouterHandler());
+
+		var fileHandlers = new Map();
+		fileHandlers.set('file_0', makeRouterHandler());
+		fileHandlers.set('file_0/file_0_0', makeRouterHandler());
+		fileHandlers.set('file_0/file_0_1', makeRouterHandler());
+
+		tests(
+			() => {
+				return (
+					<Route>
+						<Route name="react_0" handler={MockHandler}>
+							<Route name="api_0" handler={apiHandlers.get('api_0')} />
+							<Route name="api_1" handler={apiHandlers.get('api_1')} />
+						</Route>
+						<Route name="react_1" handler={MockHandler}>
+							<Route name="react_1_0" handler={MockHandler} />
+							<Route name="react_1_1" handler={MockHandler} />
+						</Route>
+						<Route name="ract_2" handler={MockHandler}>
+							<Route name="file_0" handler={fileHandlers.get('file_0')}>
+								<Route
+									name="file_0_0" 
+									handler={fileHandlers.get('file_0/file_0_0')}
+								/>								{/***/}
+								<Route
+									name="file_0_1"
+									handler={fileHandlers.get('file_0/file_0_1')}
+								/>								{/***/}
+							</Route>
+						</Route>
+					</Route>
+				);
+			},
+			getRouteParser
+		);
+	});
 });
 
 /*------------------------------------------------------------------------------------------------*/

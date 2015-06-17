@@ -145,8 +145,14 @@ function getRouteParser(route) {
 function getReactHandlers(count = 5) {
 	var handlers = new Map();
 
+	var Handler = React.createClass({
+		render() {
+			return 'SHOULD NOT BE RENDERED';
+		}
+	});
+
 	for(var i=0; i<count; i++) {
-		handlers.set(`react_${i}`, 'div');
+		handlers.set(`react_${i}`, Handler);
 	}
 
 	return handlers;

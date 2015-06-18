@@ -35,6 +35,7 @@ class RouteParser {
 	 * @return	{ReactRouterRoute}	The route with out http handlers
 	 */
 	getReactRouterRoute(): ReactRouterRoute {
+
 		return React.cloneElement(this._route, {}, this._filterRoutesChildren(
 			(route) => !hasApiHandler(route) && !hasStaticFileHandler(route)
 		));
@@ -73,17 +74,18 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 	_filterChildren(children: ReactRouterChildren, shouldKeep: (route: ReactRouterRoute) => bool)
 																			: ReactRouterRoutes	{
-		if(React.Children.count(children) === 0) return []; 
-
 		var filteredChildren = [];
-		React.Children.forEach(children, (child) => {
-			// Keeps it so React routes can have http sub-routes, but http routes can not have 
-			// React sub-routes. (Needs more changes to make it work this way)
-			if(shouldKeep(child)) {
-				filteredChildren.push(child);
-				filteredChildren = [].concat(
-					filteredChildren,
-					this._filterChildren(child.props.children, shouldKeep)
+		React.Children.forEach(children, (child, i) => {
+			// Filter children and their children by should keep
+			if(typeof child !== 'string' && shouldKeep(child)) {
+				filteredChildren.push(
+					React.cloneElement(
+						child,
+						{key: i},
+						React.Children.count(child.props.children) === 0?
+							null:
+							this._filterChildren(child.props.children, shouldKeep)
+					)	
 				);
 			}
 		});

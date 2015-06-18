@@ -1,7 +1,7 @@
 /**
  * @flow
  */
-var routeToRouter = require('../src/routeToRouter.js');
+var routeToRouter = require('./routeToRouter.js');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Exports ---

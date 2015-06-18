@@ -53,7 +53,7 @@ class RouteParser {
 		var hasHttpHandler = (route) => hasApiHandler(route) || hasStaticFileHandler(route);
 		return this._flattenRoutesFilteredChildren(hasHttpHandler).map((route) => {
 			return {
-				path: route.props.path? route.props.path: route.props.name,
+				path: this._getPathOf(route),
 				type: hasApiHandler(route)? 'api': 'file', // Already must be 'api' or 'file'
 				router: this._getRouterFrom(route)
 			};
@@ -65,7 +65,7 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 	_filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
 																		: Array<ReactRouterRoute> {
-		//NOTE, Should use React.Children.filter, but https://github.com/facebook/react/issues/2956
+		//NOTE, Should use React.Children.filter, but github.com/facebook/react/issues/2956
 		var filteredChildren = [];
 		React.Children.forEach(children, (child, i) => {
 			// Filter children and their children by should keep
@@ -99,17 +99,23 @@ class RouteParser {
 	_flattenRoutes(routes: Array<ReactRouterRoute>): Array<ReactRouterRoute> {
 		if(routes.length === 0) return [];
 
-		//NOTE, Not using React.Children.map because https://github.com/facebook/react/issues/2872
 		var flattenedRoutes = [];
-		var flattener = (currRoutes) => {
+		var flattener = (currRoutes, prefix) => {
+			//NOTE, Not using React.Children.map because github.com/facebook/react/issues/2872
 			React.Children.forEach(currRoutes, (route) => {
-				flattenedRoutes.push(route);
+				var path = `${(prefix === ''? '': prefix+'/')}${this._getPathOf(route)}`;
 
-				if(route.props.children) flattener(route.props.children);
+				flattenedRoutes.push(React.cloneElement(route, { path }));
+				if(route.props.children) flattener(route.props.children, path);
 			});
-		}; flattener(routes);
+		};
+		flattener(routes, this._getPathOf(this._route));
 
 		return flattenedRoutes;
+	}
+
+	_getPathOf(route: ReactRouterRoute): string {
+		return route.props.path? route.props.path: (route.props.name? route.props.name: '');
 	}
 }
 

@@ -72,6 +72,8 @@ describe('RouteParser', () => {
 
 			var numberOfApiHandlers = 0;
 			var numberOfStaticFileHandlers = 0;
+			var apiPaths = Array.from(apiHandlers.keys());
+			var staticFilePaths = Array.from(staticFileHandlers.keys());
 
 			routers.forEach((router) => {
 				expect(router.path).toBeDefined();
@@ -80,12 +82,12 @@ describe('RouteParser', () => {
 
 				if(router.type === 'api') {
 					expect(router.router).toBe(routeToRouter.API_ROUTER);
-					expect(apiHandlers.has(router.path)).toBe(true);
+					expect(apiPaths).toContain(router.path);
 					numberOfApiHandlers++;
 				}
 				else if(router.type === 'file') {
 					expect(router.router).toBe(routeToRouter.FILE_ROUTER);
-					expect(staticFileHandlers.has(router.path)).toBe(true);
+					expect(staticFilePaths).toContain(router.path);
 					numberOfStaticFileHandlers++;
 				}
 				else {

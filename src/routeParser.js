@@ -3,6 +3,9 @@
  */
 var React = require('react');
 
+type ReactRouterRoutes = Array<ReactRouterRoute>;
+type ReactRouterChildren = ?(ReactRouterRoute | ReactRouterRoutes);
+
 /*------------------------------------------------------------------------------------------------*/
 //	--- RouteParser ---
 /*------------------------------------------------------------------------------------------------*/
@@ -16,6 +19,8 @@ class RouteParser {
 	 * A constructor that takes the route that is being parsed.
 	 *
 	 * @param route	{ReactRouterRoute}	The route to parse
+	 *							NOTE:	React routes can have http sub-routes, but http routes can
+	 *									not have React sub-routes
 	 */
 	constructor(route: ReactRouterRoute) {
 		this._route = route;
@@ -30,7 +35,7 @@ class RouteParser {
 	 * @return	{ReactRouterRoute}	The route with out http handlers
 	 */
 	getReactRouterRoute(): ReactRouterRoute {
-		return React.cloneElement(this._route, {}, this._filterChildRoutes(
+		return React.cloneElement(this._route, {}, this._filterRoutesChildren(
 			(route) => !hasApiHandler(route) && !hasStaticFileHandler(route)
 		));
 	}
@@ -46,14 +51,14 @@ class RouteParser {
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
 		return [].concat(
-			this._filterChildRoutes(hasApiHandler).map((route) => {
+			this._filterRoutesChildren(hasApiHandler).map((route) => {
 				return {
 					path: route.props.name,
 					type: 'api',
 					router: this._makeApiRouterFrom(route)
 				};
 			}),
-			this._filterChildRoutes(hasStaticFileHandler).map((route) => {
+			this._filterRoutesChildren(hasStaticFileHandler).map((route) => {
 				return {
 					path: route.props.name,
 					type: 'file',
@@ -66,13 +71,27 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 //	--- Private Method ---
 /*------------------------------------------------------------------------------------------------*/
-	_filterChildRoutes(shouldKeep: (route: ReactRouterRoute) => bool): Array<ReactRouterRoute> 	{
-		var routes = [];
-		React.Children.forEach(
-			this._route.props.children,
-			(child) => {	if(shouldKeep(child)) routes.push(child); }
-		);
-		return routes;
+	_filterChildren(children: ReactRouterChildren, shouldKeep: (route: ReactRouterRoute) => bool)
+																			: ReactRouterRoutes	{
+		if(React.Children.count(children) === 0) return []; 
+
+		var filteredChildren = [];
+		React.Children.forEach(children, (child) => {
+			// Keeps it so React routes can have http sub-routes, but http routes can not have 
+			// React sub-routes. (Needs more changes to make it work this way)
+			if(shouldKeep(child)) {
+				filteredChildren.push(child);
+				filteredChildren = [].concat(
+					filteredChildren,
+					this._filterChildren(child.props.children, shouldKeep)
+				);
+			}
+		});
+		return filteredChildren;
+	}
+
+	_filterRoutesChildren(shouldKeep: (route: ReactRouterRoute) => bool): ReactRouterRoutes {
+		return this._filterChildren(this._route.props.children, shouldKeep);
 	}
 
 	_makeApiRouterFrom(apiRoute: ReactRouterRoute): ExpressRouter {

@@ -50,15 +50,11 @@ class RouteParser {
 	 *																router	{ExpressRouter}	
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
-		//TODO, change to include children in the array
 		var hasHttpHandler = (route) => hasApiHandler(route) || hasStaticFileHandler(route);
 		return this._flattenRoutesFilteredChildren(hasHttpHandler).map((route) => {
-			// If not api, must be file because of filter
-			var currType = hasApiHandler(route)? 'api': 'file';
-
 			return {
-				path: route.props.name,
-				type: currType,
+				path: route.props.path? route.props.path: route.props.name,
+				type: hasApiHandler(route)? 'api': 'file', // Already must be 'api' or 'file'
 				router: this._getRouterFrom(route)
 			};
 		});
@@ -69,6 +65,7 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 	_filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
 																		: Array<ReactRouterRoute> {
+		//NOTE, Should use React.Children.filter, but https://github.com/facebook/react/issues/2872
 		var filteredChildren = [];
 		React.Children.forEach(children, (child, i) => {
 			// Filter children and their children by should keep
@@ -98,9 +95,21 @@ class RouteParser {
 	_flattenRoutesFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
 		return this._flattenRoutes(this._filterRoutesChildren(shouldKeep));
 	}
-
+	
 	_flattenRoutes(routes: Array<ReactRouterRoute>): Array<ReactRouterRoute> {
-		return routes;
+		if(routes.length === 0) return [];
+
+		//NOTE, Not using React.Children.map because https://github.com/facebook/react/issues/2872
+		var flattenedRoutes = [];
+		var flattener = (currRoutes) => {
+			React.Children.forEach(currRoutes, (route) => {
+				flattenedRoutes.push(route);
+
+				if(route.props.children) flattener(route.props.children);
+			});
+		}; flattener(routes);
+
+		return flattenedRoutes;
 	}
 }
 

@@ -7,3 +7,6 @@ type ReactRouterHandler<D,P,S> = ReactClass<D,P,S>;
 type ReactRouterRoute<D,P,S> = ReactElement<D,P,S>;
 type ReactRouterCallback<D,P,S> = (Handler: ReactClass<D,P,S>, state: ReactRouterState) => void;
 type ReactRouterState = any; //TODO
+
+type ReactRouterRoutes<D,P,S> = Array<ReactRouterRoute<D,P,S>>;
+type ReactRouterChildren<D,P,S> = ?(ReactRouterRoute<D,P,S> | ReactRouterRoutes<D,P,S>);

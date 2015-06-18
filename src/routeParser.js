@@ -3,9 +3,6 @@
  */
 var React = require('react');
 
-type ReactRouterRoutes = Array<ReactRouterRoute>;
-type ReactRouterChildren = ?(ReactRouterRoute | ReactRouterRoutes);
-
 /*------------------------------------------------------------------------------------------------*/
 //	--- RouteParser ---
 /*------------------------------------------------------------------------------------------------*/
@@ -51,19 +48,20 @@ class RouteParser {
 	 *																router	{ExpressRouter}	
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
+		//TODO, change to include children in the array
 		return [].concat(
 			this._filterRoutesChildren(hasApiHandler).map((route) => {
 				return {
 					path: route.props.name,
 					type: 'api',
-					router: this._makeApiRouterFrom(route)
+					router: this._getRouterFrom(route)
 				};
 			}),
 			this._filterRoutesChildren(hasStaticFileHandler).map((route) => {
 				return {
 					path: route.props.name,
 					type: 'file',
-					router: this._makeStaticFileRouterFrom(route)
+					router: this._getRouterFrom(route)
 				};
 			})
 		);
@@ -96,12 +94,8 @@ class RouteParser {
 		return this._filterChildren(this._route.props.children, shouldKeep);
 	}
 
-	_makeApiRouterFrom(apiRoute: ReactRouterRoute): ExpressRouter {
-		return {};
-	}
-
-	_makeStaticFileRouterFrom(statifFileRoute: ReactRouterRoute): ExpressRouter {
-		return {};
+	_getRouterFrom(route: ReactRouterRoute): ExpressRouter {
+		return route.props.handler.getRouter();
 	}
 }
 

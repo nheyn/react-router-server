@@ -65,7 +65,7 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 	_filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
 																		: Array<ReactRouterRoute> {
-		//NOTE, Should use React.Children.filter, but https://github.com/facebook/react/issues/2872
+		//NOTE, Should use React.Children.filter, but https://github.com/facebook/react/issues/2956
 		var filteredChildren = [];
 		React.Children.forEach(children, (child, i) => {
 			// Filter children and their children by should keep

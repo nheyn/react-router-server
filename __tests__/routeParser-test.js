@@ -2,23 +2,22 @@ jest.dontMock('../src/routeParser.js');
 
 var React = require('react');
 var { Route } = require('react-router');
-var express = require('express');
 
 
 var RouteParser = require('../src/routeParser.js');
-//var httpRoutes = require('../src/httpRoutes.js');
+//var routeToRouter = require('../src/routeToRouter.js');
 
 /*------------------------------------------------------------------------------------------------*/
 // Http Mock
 /*------------------------------------------------------------------------------------------------*/
-var httpRoutes = jest.genMockFromModule('../src/httpRoutes.js');
-httpRoutes.makeApiHandler = function() {
+var routeToRouter = jest.genMockFromModule('../src/routeToRouter.js');
+routeToRouter.makeApiFunctionHandler = function() {
 	var Handler = function() {};
 	Handler.hasApiHandler = true;
 	return Handler;
 };
 
-httpRoutes.makeStaticFileHandler = function() {
+routeToRouter.makeStaticFileHandler = function() {
 	var Handler = function() {};
 	Handler.hasStaticFileHandler = true;
 	return Handler;
@@ -62,7 +61,7 @@ describe('RouteParser', () => {
 			checkAllChildrenAreReact(filteredRoute.props.children);
 		});
 
-		it('creates express routes from http handlers', () => {
+		it('creates function routes from http handlers', () => {
 			var route = getRoute();
 			var routeParser = createRouteParser(route);
 
@@ -163,7 +162,7 @@ describe('RouteParser', () => {
 
 	describe('when api handlers has sub routes', () => {
 		//TODO, update to be generated (see other test)
-		var makeRouterHandler = () => httpRoutes.makeApiHandler(express.Router());
+		var makeRouterHandler = () => routeToRouter.makeApiFunctionHandler(() => {});
 		var apiHandlers = new Map();
 		apiHandlers.set('api_0', makeRouterHandler());
 		apiHandlers.set('api_0/api_0_0', makeRouterHandler());
@@ -194,7 +193,7 @@ describe('RouteParser', () => {
 
 	describe('when file handlers has sub routes', () => {
 		//TODO, update to be generated (see other test)
-		var makeRouterHandler = () => httpRoutes.makeStaticFileHandler('path/to/file');
+		var makeRouterHandler = () => routeToRouter.makeStaticFileHandler('path/to/file');
 		var fileHandlers = new Map();
 		fileHandlers.set('file_0', makeRouterHandler());
 		fileHandlers.set('file_0/file_0_0', makeRouterHandler());
@@ -226,13 +225,13 @@ describe('RouteParser', () => {
 
 	describe('when react handlers has sub routes that are http handlers', () => {
 		//TODO, update to be generated (see other test)
-		var makeApiHandler = () => httpRoutes.makeApiHandler(express.Router());
+		var makeApiFunctionHandler = () => routeToRouter.makeApiFunctionHandler(() => {});
 		var apiHandlers = new Map();
-		apiHandlers.set('api_0', makeApiHandler());
-		apiHandlers.set('api_1', makeApiHandler());
+		apiHandlers.set('api_0', makeApiFunctionHandler());
+		apiHandlers.set('api_1', makeApiFunctionHandler());
 
 
-		var makeFileHandler = () => httpRoutes.makeStaticFileHandler('path/to/file');
+		var makeFileHandler = () => routeToRouter.makeStaticFileHandler('path/to/file');
 		var fileHandlers = new Map();
 		fileHandlers.set('file_0', makeFileHandler());
 		fileHandlers.set('file_0/file_0_0', makeFileHandler());
@@ -320,7 +319,7 @@ function getApiHandlers(count = 5) {
 	for(var i=0; i<count; i++) {
 		handlers.set(
 			`api_${i}`, 
-			httpRoutes.makeApiHandler(express.Router())
+			routeToRouter.makeApiFunctionHandler(() => {})
 		);
 	}
 
@@ -333,7 +332,7 @@ function getStaticFileHandlers(count = 5) {
 	for(var i=0; i<count; i++) {
 		handlers.set(
 			`file_${i}`, 
-			httpRoutes.makeStaticFileHandler('path/to/file_${i}.txt')
+			routeToRouter.makeStaticFileHandler('path/to/file_${i}.txt')
 		);
 	}
 

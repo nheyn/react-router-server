@@ -1,11 +1,12 @@
 /**
  * @flow
  */
-var httpRoutes = require('../src/httpRoutes.js');
+var routeToRouter = require('../src/routeToRouter.js');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Exports ---
 /*------------------------------------------------------------------------------------------------*/
 module.exports.RouteParser = require('./routeParser');
-module.exports.makeApiHandler = httpRoutes.makeApiHandler;
-module.exports.makeStaticFileHandler = httpRoutes.makeStaticFileHandler;
+module.exports.makeApiFunctionHandler = routeToRouter.makeApiFunctionHandler;
+module.exports.makeApiRouterHandler = routeToRouter.makeApiRouterHandler;
+module.exports.makeStaticFileHandler = routeToRouter.makeStaticFileHandler;

@@ -1,5 +1,23 @@
 jest.dontMock('../src/routeToRouter.js');
 
+var expressMock = function() {}; //jest.genMockFromModule('express');
+expressMock.Router = function(router) {
+	return {
+		use(callabck_or_router) {
+			if(callabck_or_router.filePath) {
+				this.filePath = callabck_or_router.filePath;
+			}
+			else {
+				this.callbackFunction = callabck_or_router;
+			}
+		}
+	}
+};
+expressMock.static = function(filePath) {
+	return { filePath };
+};
+jest.setMock('express', expressMock);
+
 var React = require('react');
 var express = require('express');
 
@@ -22,7 +40,7 @@ describe('makeApiFunctionHandler', () => {
 		var Handler = routeToRouter.makeApiFunctionHandler(callback);
 
 		expect(Handler.getRouter).toBeDefined();
-		//expect(Handler.getRouter().callbackFunction).toBe(callback);	//TODO, express needs mocked for this to work
+		expect(Handler.getRouter().callbackFunction).toBe(callback);
 	});
 });
 
@@ -58,7 +76,7 @@ describe('makeStaticFileHandler', () => {
 		var Handler = routeToRouter.makeStaticFileHandler(filePath);
 
 		expect(Handler.getRouter).toBeDefined();
-		//expect(Handler.getRouter().filePath).toBe(filePath);	//TODO, express needs mocked for this to work
+		expect(Handler.getRouter().filePath).toBe(filePath);
 	});
 });
 

@@ -1,27 +1,30 @@
 jest.dontMock('../src/routeParser.js');
 
+var routeToRouterMock = jest.genMockFromModule('../src/routeToRouter.js');
+routeToRouterMock.API_ROUTER = 'API_ROUTER';
+routeToRouterMock.makeApiFunctionHandler = function() {
+	var Handler = function() {};
+	Handler.hasApiHandler = true;
+	Handler.getRouter = jest.genMockFunction().mockReturnValue(routeToRouterMock.API_ROUTER);
+	return Handler;
+};
+
+routeToRouterMock.FILE_ROUTER = 'FILE_ROUTER';
+routeToRouterMock.makeStaticFileHandler = function() {
+	var Handler = function() {};
+	Handler.hasStaticFileHandler = true;
+	Handler.getRouter = jest.genMockFunction().mockReturnValue(routeToRouterMock.FILE_ROUTER);
+	return Handler;
+};
+
+jest.setMock('../src/routeToRouter.js', routeToRouterMock);
+
 var React = require('react');
 var { Route } = require('react-router');
 
 
 var RouteParser = require('../src/routeParser.js');
-//var routeToRouter = require('../src/routeToRouter.js');
-
-/*------------------------------------------------------------------------------------------------*/
-// Http Mock
-/*------------------------------------------------------------------------------------------------*/
-var routeToRouter = jest.genMockFromModule('../src/routeToRouter.js');
-routeToRouter.makeApiFunctionHandler = function() {
-	var Handler = function() {};
-	Handler.hasApiHandler = true;
-	return Handler;
-};
-
-routeToRouter.makeStaticFileHandler = function() {
-	var Handler = function() {};
-	Handler.hasStaticFileHandler = true;
-	return Handler;
-};
+var routeToRouter = require('../src/routeToRouter.js');
 
 /*------------------------------------------------------------------------------------------------*/
 // React Router Handler Mock
@@ -66,22 +69,32 @@ describe('RouteParser', () => {
 			var routeParser = createRouteParser(route);
 
 			var routers = routeParser.getExpressRouters();
+
+			var numberOfApiHandlers = 0;
+			var numberOfStaticFileHandlers = 0;
+
 			routers.forEach((router) => {
 				expect(router.path).toBeDefined();
 				expect(router.type).toBeDefined();
-				expect(router.router).toBeDefined();	//NOTE, router.router is not checked if it
-														//		is correct, just if it is defined
+				expect(router.router).toBeDefined();
 
 				if(router.type === 'api') {
+					expect(router.router).toBe(routeToRouter.API_ROUTER);
 					expect(apiHandlers.has(router.path)).toBe(true);
+					numberOfApiHandlers++;
 				}
 				else if(router.type === 'file') {
+					expect(router.router).toBe(routeToRouter.FILE_ROUTER);
 					expect(staticFileHandlers.has(router.path)).toBe(true);
+					numberOfStaticFileHandlers++;
 				}
 				else {
 					expect(router.type).toBe('api OR staticFile');
 				}
 			});
+
+			expect(numberOfApiHandlers).toBe(apiHandlers.size);
+			expect(numberOfStaticFileHandlers).toBe(staticFileHandlers.size);
 		});
 	};
 

@@ -3,6 +3,8 @@
  */
 var React = require('react');
 
+type RouteFilter = (route: ReactRouterRoute) => bool;
+
 /*------------------------------------------------------------------------------------------------*/
 //	--- RouteParser ---
 /*------------------------------------------------------------------------------------------------*/
@@ -49,29 +51,24 @@ class RouteParser {
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
 		//TODO, change to include children in the array
-		return [].concat(
-			this._filterRoutesChildren(hasApiHandler).map((route) => {
-				return {
-					path: route.props.name,
-					type: 'api',
-					router: this._getRouterFrom(route)
-				};
-			}),
-			this._filterRoutesChildren(hasStaticFileHandler).map((route) => {
-				return {
-					path: route.props.name,
-					type: 'file',
-					router: this._getRouterFrom(route)
-				};
-			})
-		);
+		var hasHttpHandler = (route) => hasApiHandler(route) || hasStaticFileHandler(route);
+		return this._flattenRoutesFilteredChildren(hasHttpHandler).map((route) => {
+			// If not api, must be file because of filter
+			var currType = hasApiHandler(route)? 'api': 'file';
+
+			return {
+				path: route.props.name,
+				type: currType,
+				router: this._getRouterFrom(route)
+			};
+		});
 	}
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Private Method ---
 /*------------------------------------------------------------------------------------------------*/
-	_filterChildren(children: ReactRouterChildren, shouldKeep: (route: ReactRouterRoute) => bool)
-																			: ReactRouterRoutes	{
+	_filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
+																		: Array<ReactRouterRoute> {
 		var filteredChildren = [];
 		React.Children.forEach(children, (child, i) => {
 			// Filter children and their children by should keep
@@ -90,12 +87,20 @@ class RouteParser {
 		return filteredChildren;
 	}
 
-	_filterRoutesChildren(shouldKeep: (route: ReactRouterRoute) => bool): ReactRouterRoutes {
+	_filterRoutesChildren(shouldKeep: RouteFilter): Array<ReactRouterRoute> {
 		return this._filterChildren(this._route.props.children, shouldKeep);
 	}
 
 	_getRouterFrom(route: ReactRouterRoute): ExpressRouter {
 		return route.props.handler.getRouter();
+	}
+
+	_flattenRoutesFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
+		return this._flattenRoutes(this._filterRoutesChildren(shouldKeep));
+	}
+
+	_flattenRoutes(routes: Array<ReactRouterRoute>): Array<ReactRouterRoute> {
+		return routes;
 	}
 }
 

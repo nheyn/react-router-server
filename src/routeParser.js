@@ -26,7 +26,7 @@ class RouteParser {
 	}
 
 /*------------------------------------------------------------------------------------------------*/
-//	--- Private Method ---
+//	Public Methods
 /*------------------------------------------------------------------------------------------------*/
 	/**
 	 * Gets the react router route without any of the http handler routes.
@@ -61,7 +61,7 @@ class RouteParser {
 	}
 
 /*------------------------------------------------------------------------------------------------*/
-//	--- Private Method ---
+//	Private Methods
 /*------------------------------------------------------------------------------------------------*/
 	_filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
 																		: Array<ReactRouterRoute> {

@@ -1,30 +1,31 @@
 {
-	"name": "async-react-router",
-	"version": "0.1.0",
-	"description": "An http server for React Router Applications.",
-	"author": "Nick Heyn <nick@heyn.io>",
-	"main": "lib/index.js",
-	"dependencies": {
-		"react": "*",
-		"react-router": "*",
-		"express": "*",
-		"babel": "*"
-	},
-	"devDependencies": {
-		"babel-jest": "*",
-		"jest-cli": "*"
-	},
-	"scripts": {
-		"test": "jest",
-		"prepublish": "babel ./src/ -d ./lib/"
-	},
-	"jest": {
-		"scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-		"setupEnvScriptFile": "<rootDir>/jestEnvironment.js",
-		"unmockedModulePathPatterns": [
-			"core-js/.*",
-			"react-router"
-		]
-	},
-	"license": "MIT"
+  "name": "async-react-router",
+  "version": "0.1.0",
+  "description": "An http server for React Router Applications.",
+  "author": "Nick Heyn <nick@heyn.io>",
+  "main": "lib/index.js",
+  "dependencies": {
+    "async-react-router": "file:../../GitHub/async-react-router",
+    "babel": "*",
+    "express": "*",
+    "react": "*",
+    "react-router": "*"
+  },
+  "devDependencies": {
+    "babel-jest": "*",
+    "jest-cli": "*"
+  },
+  "scripts": {
+    "test": "jest",
+    "prepublish": "babel ./src/ -d ./lib/"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+    "setupEnvScriptFile": "<rootDir>/jestEnvironment.js",
+    "unmockedModulePathPatterns": [
+      "core-js/.*",
+      "react-router"
+    ]
+  },
+  "license": "MIT"
 }

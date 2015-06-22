@@ -1,6 +1,7 @@
 declare module "react-router" {
 	declare function run(routes: ReactRouterRoute, loc: any, callback: ReactRouterCallback): void;
 	declare var RouteHandler: any; //RouteHandler;
+	declare var HistoryLocation: any;
 }
 
 type ReactRouterHandler<D,P,S> = ReactClass<D,P,S>;

@@ -2,6 +2,7 @@
  * @flow
  */
 var ReactRouterServer = require('./server');
+var ReactRouterClient = require('./client');
 var routeToRouter = require('./routeToRouter');
 
 /*------------------------------------------------------------------------------------------------*/
@@ -33,11 +34,32 @@ function createApp(route: ReactRouterRoute, initialCallback?: ExpressCallback): 
 	return server.getApp();
 }
 
+/**
+ * Render the given route in the given element.
+ *
+ * @note The 'getProps' and 'getContext' arguments are called each time the page is changed
+ *
+ * @param route			{ReactRouterRoute}	The route for this server
+ * @param reactElement	{HTMLElement}		The html element to render the react app in
+ * @param [getProps]	{GetMaybePromise}	A function to get the props (maybe in a promise) 
+ * @param [getContext]	{GetMaybePromise}	A function to get the context (maybe in a promise)
+ *
+ * @return				{Promise<ReactComponent>}	The rendered react component in an Promise
+ */
+function renderRoute(	route: ReactRouterRoute,
+						element: HTMLElement,
+						getProps?: GetMaybePromise, 
+						getContext?: GetMaybePromise	): Promise<ReactComponent> {
+	var client = new ReactRouterClient(route, getProps, getContext);
+	return client.renderApp(element);
+}
+
 /*------------------------------------------------------------------------------------------------*/
 //	--- Exports ---
 /*------------------------------------------------------------------------------------------------*/
 module.exports.RouteParser = require('./routeParser');
 module.exports.server = { createRouter, createApp };
+module.exports.client = { renderRoute };
 module.exports.makeApiFunctionHandler = routeToRouter.makeApiFunctionHandler;
 module.exports.makeApiRouterHandler = routeToRouter.makeApiRouterHandler;
 module.exports.makeStaticFileHandler = routeToRouter.makeStaticFileHandler;

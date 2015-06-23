@@ -1,5 +1,6 @@
 declare module "react-router" {
 	declare function run(routes: ReactRouterRoute, loc: any, callback: ReactRouterCallback): void;
+	declare var Route: ReactClass;
 	declare var RouteHandler: ReactClass;
 	declare var HistoryLocation: any;
 }

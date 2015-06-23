@@ -5,53 +5,94 @@ var ReactRouterServer = require('./server');
 var ReactRouterClient = require('./client');
 var routeToRouter = require('./routeToRouter');
 
+type SeverSettingsType = {
+	route: ReactRouterRoute;
+	initialCallback?: ExpressCallback;
+};
+
+type ClientSettingsType = {
+	route: ReactRouterRoute;
+	element: HTMLElement;
+	getProps?: GetMaybePromise;
+	getContext?: GetMaybePromise;
+};
+
 /*------------------------------------------------------------------------------------------------*/
 //	--- Constructor Function ---
 /*------------------------------------------------------------------------------------------------*/
 /**
  * Create an express Router that uses the given route and calls the given callback for each request.
  *
- * @param route				{ReactRouterRoute}	The route for this server
- * @param [initialCallback]	{ExpressCallback}	The first callback to call for this server
+ * @note	The 'initialCallback' can set (in req.server) 
+ *				- The html template string (in req.server.htmlTemplate)
+ *					- will replace '<react />' with the app's html
+ *				- The props (in req.server.props)
+ *				- The context (in req.server.context)
  *
- * @return					{ExpressRouter}		The router for this server
+ * @param settings			{Object}				The settings for the server
+ *			route				{ReactRouterRoute}		The route for this server
+ *			[initialCallback]	{ExpressCallback}		The first callback to call for this server
+ *
+ * @throws 					{Error}					Thrown if '.route' is missing in the settings
+ *													argument
+ *
+ * @return					{ExpressRouter}			The router for this server
  */
-function createRouter(route: ReactRouterRoute, initialCallback?: ExpressCallback): ExpressRouter {
-	var server = new ReactRouterServer(route, initialCallback);
+function createRouter(settings: SeverSettingsType): ExpressRouter {
+	if(!settings.route) throw new Error("The 'createRouter()' settings must include '.route'");
+
+	var server = new ReactRouterServer(settings.route, settings.initialCallback);
 	return server.getRouter();
 }
 
 /**
  * Create an express Router that uses the given route and calls the given callback for each app.
  *
- * @param route				{ReactRouterRoute}	The route for this server
- * @param [initialCallback]	{ExpressCallback}	The first callback to call for this server
+ * @param settings			{Object}				The settings for the server
+ *			route				{ReactRouterRoute}		The route for this server
+ *			[initialCallback]	{ExpressCallback}		The first callback to call for this server
+ *
+ * @throws 					{Error}					Thrown if '.route' is missing in the settings
+ *													argument
  *
  * @return	{ExpressApp}	The app for this server
  */
-function createApp(route: ReactRouterRoute, initialCallback?: ExpressCallback): ExpressApp {
-	var server = new ReactRouterServer(route, initialCallback);
+function createApp(settings: SeverSettingsType): ExpressApp {
+	if(!settings.route) throw new Error("The 'createApp()' settings must include '.route'");
+
+	var server = new ReactRouterServer(settings.route, settings.initialCallback);
 	return server.getApp();
 }
 
 /**
  * Render the given route in the given element.
  *
- * @note The 'getProps' and 'getContext' arguments are called each time the page is changed
+ * @note 	The 'getProps' and 'getContext' arguments are called (if given) each time the page
+ *			is changed
+ * @note	The 'getProps' and 'getContext' arguments can either return the result (prop or 
+ *			context), or the result inside of a Promise
  *
- * @param route			{ReactRouterRoute}	The route for this server
- * @param reactElement	{HTMLElement}		The html element to render the react app in
- * @param [getProps]	{GetMaybePromise}	A function to get the props (maybe in a promise) 
- * @param [getContext]	{GetMaybePromise}	A function to get the context (maybe in a promise)
+ * @param settings		{Object}					The settings for the server
+ *			route			{ReactRouterRoute}			The route for this server
+ *			element			{HTMLElement}				The element to render the app's html in
+ *			[getProps]		{GetMaybePromise}			A function to get the props 
+ *			[getContext]	{GetMaybePromise}			A function to get the context
  *
- * @return				{Promise<ReactComponent>}	The rendered react component in an Promise
+ * @throws 				{Error}						Thrown if '.route' or '.element' is missing in
+ *													the settings argument
+ *
+ * @return				{Promise<ReactComponent>}	The rendered react component in a Promise
  */
-function renderRoute(	route: ReactRouterRoute,
-						element: HTMLElement,
-						getProps?: GetMaybePromise,
-						getContext?: GetMaybePromise	): Promise<ReactComponent> {
-	var client = new ReactRouterClient(route, getProps, getContext);
-	return client.renderApp(element);
+function renderRoute(settings: ClientSettingsType): Promise<ReactComponent> {
+	if(!settings.route) {
+		throw new Error("The 'renderRoute()' settings must include '.route'");
+	}
+	if(!settings.element) {
+		throw new Error("The 'renderRoute()' settings must include '.element'");
+	}
+
+	var client = new ReactRouterClient(settings.route, settings.getProps, settings.getContext);
+	return client.renderApp(settings.element);
 }
 
 /*------------------------------------------------------------------------------------------------*/

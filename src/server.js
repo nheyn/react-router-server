@@ -22,9 +22,9 @@ class ReactRouterServer {
 	 * is received.
 	 *
 	 * @param route				{ReactRouterRoute}	The route for this server
-	 * @param [initialCallback]	{ExpressCallback}	The first callback to call for this server
+	 * @param [initialCallback]	{?ExpressCallback}	The first callback to call for this server
 	 */
-	constructor(route: ReactRouterRoute, initialCallback?: ExpressCallback) {
+	constructor(route: ReactRouterRoute, initialCallback?: ?ExpressCallback) {
 		this._parseRoute(route);
 		
 		if(initialCallback)	this._setInitialCallback(initialCallback);
@@ -73,7 +73,7 @@ class ReactRouterServer {
 			// Set up store for server data for this request
 			req.server = {};
 
-			// Call next callback (or next)
+			// Call next callback
 			try{
 				callback(req, res, next);
 			}
@@ -105,12 +105,15 @@ class ReactRouterServer {
 	}
 
 	_handleInitialPageLoad(req: ExpressReq, res: ExpressRes, next: () => void) {
+		// Skip if error has already occurred
 		if(req.server.error) next();
 
+		// Get inputs, can be set in this._initialCallback
 		var props = req.server.props? req.server.props: {}
 		var context = req.server.context? req.server.context: {};
-		var htmlTemplate = '<react />'; //TODO, get template string (from req or constructor ???)
+		var htmlTemplate = req.sever.htmlTemplate? req.server.htmlTemplate: '<react />';
 
+		// Render / Send the the current React Route
 		AsyncRouter.run(this._route, req.url, (Handler, state) => {
 			AsyncReact.renderToString(<Handler {...props} />, context)
 				.then((reactHtml) => {

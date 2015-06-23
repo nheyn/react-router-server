@@ -48,7 +48,7 @@ function createApp(route: ReactRouterRoute, initialCallback?: ExpressCallback): 
  */
 function renderRoute(	route: ReactRouterRoute,
 						element: HTMLElement,
-						getProps?: GetMaybePromise, 
+						getProps?: GetMaybePromise,
 						getContext?: GetMaybePromise	): Promise<ReactComponent> {
 	var client = new ReactRouterClient(route, getProps, getContext);
 	return client.renderApp(element);
@@ -58,6 +58,7 @@ function renderRoute(	route: ReactRouterRoute,
 //	--- Exports ---
 /*------------------------------------------------------------------------------------------------*/
 module.exports.RouteParser = require('./routeParser');
+module.exports.RouterRoute = require('./routerRoute');
 module.exports.server = { createRouter, createApp };
 module.exports.client = { renderRoute };
 module.exports.makeApiFunctionHandler = routeToRouter.makeApiFunctionHandler;

@@ -1,15 +1,16 @@
 {
-	"name": "async-react-router-basic-site",
+	"name": "react-router-server-basic-example",
 	"version": "0.1.0",
-	"description": "React Router wrapper that allows async initial data loading.",
+	"description": "A example of how to use react-router-server.",
 	"author": "Nick Heyn <nick@heyn.io>",
-	"bin": {
-		"basic-site": "./src/index.js"
-	},
 	"dependencies": {
 		"babel": "*",
 		"react": "*",
 		"react-router": "*",
-		"async-react-router": "file:/var/async-react-router/"
+		"react-router-server": "file:/var/react-router-server/"
+	},
+	"scripts": {
+		"prepublish": "babel ./src/ -d ./lib/",
+		"start": "./index.js"
 	}
 }

@@ -9,7 +9,7 @@ var routeToRouter = require('./routeToRouter');
 //	--- Router Route Handler Definitions ---
 /*------------------------------------------------------------------------------------------------*/
 /**
- * A React class, that can be use instead of React Router's Route class, that can 
+ * A React class, that can be use instead of React Router's Route class, that can
  */
 var RouterRoute = React.createClass({
 	propTypes: {
@@ -22,7 +22,7 @@ var RouterRoute = React.createClass({
 	render(): ReactElement {
 		return <Route name={this.props.name} path={this.props.path} handler={this.getHandler()} />;
 	},
-	getHandler(): ?ReactRouterHandler {
+	getHandler(): ReactRouterHandler {
 		if(this.props.callback) {
 			return routeToRouter.makeApiFunctionHandler(this.props.callback);
 		}

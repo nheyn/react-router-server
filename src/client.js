@@ -22,11 +22,11 @@ class ReactRouterClient {
 	 * @note The 'getProps' and 'getContext' arguments are called each time the page is changed
 	 *
 	 * @param route			{ReactRouterRoute}	The route for this server
-	 * @param [getProps]	{?GetMaybePromise}	A function to get the props (maybe in a promise) 
+	 * @param [getProps]	{?GetMaybePromise}	A function to get the props (maybe in a promise)
 	 * @param [getContext]	{?GetMaybePromise}	A function to get the context (maybe in a promise)
 	 */
-	constructor(	route: ReactRouterRoute, 
-					getProps?: ?GetMaybePromise, 
+	constructor(	route: ReactRouterRoute,
+					getProps?: ?GetMaybePromise,
 					getContext?: ?GetMaybePromise	) {
 		this._parseRoute(route);
 

@@ -8,11 +8,11 @@ window.onload = () => {
 	client.renderRoute({
 		route: exampleRoute,
 		element: window.getElementById('react'),
-		getProps(): {
+		getProps: function() {
 			//TODO
-			return null;	
-		}
-		getContext(): {
+			return null;
+		},
+		getContext: function() {
 			//TODO
 			return null;
 		}

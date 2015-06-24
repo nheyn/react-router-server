@@ -34,7 +34,6 @@ class RouteParser {
 	 * @return	{ReactRouterRoute}	The route with out http handlers
 	 */
 	getReactRouterRoute(): ReactRouterRoute {
-
 		return React.cloneElement(this._route, {}, this._filterRoutesChildren(
 			(route) => !hasApiHandler(route) && !hasStaticFileHandler(route)
 		));
@@ -47,7 +46,7 @@ class RouteParser {
 	 *														form:
 	 *																path 	{string}
 	 *																type 	{'api' OR 'file'}
-	 *																router	{ExpressRouter}	
+	 *																router	{ExpressRouter}
 	 */
 	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
 		var hasHttpHandler = (route) => hasApiHandler(route) || hasStaticFileHandler(route);
@@ -77,7 +76,7 @@ class RouteParser {
 						React.Children.count(child.props.children) === 0?
 							null:
 							this._filterChildren(child.props.children, shouldKeep)
-					)	
+					)
 				);
 			}
 		});
@@ -95,7 +94,7 @@ class RouteParser {
 	_flattenRoutesFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
 		return this._flattenRoutes(this._filterRoutesChildren(shouldKeep));
 	}
-	
+
 	_flattenRoutes(routes: Array<ReactRouterRoute>): Array<ReactRouterRoute> {
 		if(routes.length === 0) return [];
 

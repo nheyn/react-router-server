@@ -5,12 +5,13 @@
 	"author": "Nick Heyn <nick@heyn.io>",
 	"dependencies": {
 		"babel": "*",
+		"browserify": "*",
 		"react": "*",
 		"react-router": "*",
-		"react-router-server": "file:/var/react-router-server/"
+		"express": "*",
+		"react-router-server": "file:/lib/react-router-server/"
 	},
 	"scripts": {
-		"prepublish": "babel ./src/ -d ./lib/",
-		"start": "./index.js"
+		"prepublish": "babel ./src/ -d ./lib/"
 	}
 }

@@ -1,12 +1,12 @@
 require('babel/polyfill');
 
-var { server } = require('react-router-server');
+var RouterServer = require('react-router-server');
 var exampleRoute = require('./route');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Create Servers ---
 /*------------------------------------------------------------------------------------------------*/
-server.createApp({
+RouterServer.server.createApp({
 	route: exampleRoute,
 	initialCallback(req, res, next) {
 		//TODO, set props

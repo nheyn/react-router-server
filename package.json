@@ -1,11 +1,11 @@
 {
-  "name": "async-react-router",
+  "name": "react-router-server",
   "version": "0.1.0",
   "description": "An http server for React Router Applications.",
   "author": "Nick Heyn <nick@heyn.io>",
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "dependencies": {
-    "async-react-router": "file:../../GitHub/async-react-router",
+    "async-react-router": "file:/var/async-react-router",
     "babel": "*",
     "express": "*",
     "react": "*",

@@ -4,6 +4,10 @@
 var React = require('react');
 
 type RouteFilter = (route: ReactRouterRoute) => bool;
+type RouterAndPath = {
+	path: string;
+	router: ExpressRouter;
+};
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- RouteParser ---
@@ -34,26 +38,24 @@ class RouteParser {
 	 * @return	{ReactRouterRoute}	The route with out http handlers
 	 */
 	getReactRouterRoute(): ReactRouterRoute {
-		return React.cloneElement(this._route, {}, this._filterRoutesChildren(
-			(route) => !hasApiHandler(route) && !hasStaticFileHandler(route)
-		));
+		return React.cloneElement(
+			this._route,
+			{},
+			this._filterRoutesChildren((route) => !isRouterRoute(route))
+		);
 	}
 
 	/**
 	 * Gets the express routers defined in the react router Route.
 	 *
-	 * @return	{Array<ReactRouteToExpressRouterObject>}	The express routes in the object in the
-	 *														form:
-	 *																path 	{string}
-	 *																type 	{'api' OR 'file'}
-	 *																router	{ExpressRouter}
+	 * @return	{Array<RouterAndPath>}	An array of the express routes in the object in the form:
+	 *										path 	{string}
+	 *										router	{ExpressRouter}
 	 */
-	getExpressRouters(): Array<ReactRouteToExpressRouterObject> {
-		var hasHttpHandler = (route) => hasApiHandler(route) || hasStaticFileHandler(route);
-		return this._flattenRoutesFilteredChildren(hasHttpHandler).map((route) => {
+	getExpressRouters(): Array<RouterAndPath> {
+		return this._flattenRoutesFilteredChildren(isRouterRoute).map((route) => {
 			return {
 				path: this._getPathOf(route),
-				type: hasApiHandler(route)? 'api': 'file', // Already must be 'api' or 'file'
 				router: this._getRouterFrom(route)
 			};
 		});
@@ -87,10 +89,6 @@ class RouteParser {
 		return this._filterChildren(this._route.props.children, shouldKeep);
 	}
 
-	_getRouterFrom(route: ReactRouterRoute): ExpressRouter {
-		return route.props.handler.getRouter();
-	}
-
 	_flattenRoutesFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
 		return this._flattenRoutes(this._filterRoutesChildren(shouldKeep));
 	}
@@ -116,17 +114,23 @@ class RouteParser {
 	_getPathOf(route: ReactRouterRoute): string {
 		return route.props.path? route.props.path: (route.props.name? route.props.name: '');
 	}
+
+	_getRouterFrom(route: ReactRouterRoute): ExpressRouter {
+		if(!isRouterRoute(route)) {
+			throw new Error("Routes passed to 'RouteParser._getRouterFrom' must have 'getRouter'.");
+		}
+
+		var _route: any = route;	//NOTE, for flowtype
+		return _route.getRouter();
+	}
 }
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Helper function ---
 /*------------------------------------------------------------------------------------------------*/
-function hasApiHandler(route: ReactRouterRoute): bool {
-	return route.props.handler.hasApiHandler? true: false;
-}
-
-function hasStaticFileHandler(route: ReactRouterRoute): bool {
-	return route.props.handler.hasStaticFileHandler? true: false;
+function isRouterRoute(route: ReactRouterRoute): bool {
+	var _route: any = route;	//NOTE, for flowtype
+	return _route.getRouter? true: false;
 }
 
 /*------------------------------------------------------------------------------------------------*/

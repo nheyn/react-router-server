@@ -15,9 +15,3 @@ declare class ExpressRouter {
 declare class ExpressApp extends ExpressRouter {
 	listen(port: number): void;
 };
-
-type ReactRouteToExpressRouterObject = {
-	path: string;
-	type: string;
-	router: ExpressRouter;
-};

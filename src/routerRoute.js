@@ -17,7 +17,7 @@ var RouterRoute = React.createClass({
 		path: React.PropTypes.string,
 		src: React.PropTypes.string,
 		callback: React.PropTypes.func,
-		router: React.PropTypes.object
+		router: React.PropTypes.any // Because ExpressRouter is a func with props
 	},
 	render(): ReactElement {
 		throw new Error('RouterRoute should never be rendered');

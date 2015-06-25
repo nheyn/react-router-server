@@ -3,7 +3,7 @@
  */
 var React = require('react');
 var { Route } = require('react-router');
-var routeToRouter = require('./routeToRouter');
+var express = require('express');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Router Route Handler Definitions ---
@@ -20,20 +20,29 @@ var RouterRoute = React.createClass({
 		router: React.PropTypes.object
 	},
 	render(): ReactElement {
-		return <Route name={this.props.name} path={this.props.path} handler={this.getHandler()} />;
+		throw new Error('RouterRoute should never be rendered');
 	},
-	getHandler(): ReactRouterHandler {
-		if(this.props.callback) {
-			return routeToRouter.makeApiFunctionHandler(this.props.callback);
+	getRouter(): ExpressRouter {
+		if(this.props.router) {
+			return this.props.router;
 		}
-		else if(this.props.router) {
-			return routeToRouter.makeApiRouterHandler(this.props.router);
+		else if(this.props.callback) {
+			return this.getRouterFromCallback(this.props.callback);
 		}
 		else if(this.props.src) {
-			return routeToRouter.makeStaticFileHandler(this.props.src);
+			return this.getRouterFromSrc(this.props.src);
 		}
-
-		throw new Error("RouterRoute must have 'callback', 'router' or 'src' prop.")
+		else {
+			throw new Error("RouterRoute must have 'callback', 'router' or 'src' prop.");
+		}
+	},
+	getRouterFromCallback(callback: ExpressCallback): ExpressRouter {
+		var router = express.Router();
+		router.use(callback);
+		return router;
+	},
+	getRouterFromSrc(src: string): ExpressRouter {
+		return express.static(src);
 	}
 });
 

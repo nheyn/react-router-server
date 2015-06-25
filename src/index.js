@@ -3,7 +3,6 @@
  */
 var ReactRouterServer = require('./server');
 var ReactRouterClient = require('./client');
-var routeToRouter = require('./routeToRouter');
 
 type SeverSettingsType = {
 	route: ReactRouterRoute;
@@ -23,7 +22,7 @@ type ClientSettingsType = {
 /**
  * Create an express Router that uses the given route and calls the given callback for each request.
  *
- * @note	The 'initialCallback' can set (in req.server) 
+ * @note	The 'initialCallback' can set (in req.server)
  *				- The html template string (in req.server.htmlTemplate)
  *					- will replace '<react />' with the app's html
  *				- The props (in req.server.props)
@@ -69,13 +68,13 @@ function createApp(settings: SeverSettingsType): ExpressApp {
  *
  * @note 	The 'getProps' and 'getContext' arguments are called (if given) each time the page
  *			is changed
- * @note	The 'getProps' and 'getContext' arguments can either return the result (prop or 
+ * @note	The 'getProps' and 'getContext' arguments can either return the result (prop or
  *			context), or the result inside of a Promise
  *
  * @param settings		{Object}					The settings for the server
  *			route			{ReactRouterRoute}			The route for this server
  *			element			{HTMLElement}				The element to render the app's html in
- *			[getProps]		{GetMaybePromise}			A function to get the props 
+ *			[getProps]		{GetMaybePromise}			A function to get the props
  *			[getContext]	{GetMaybePromise}			A function to get the context
  *
  * @throws 				{Error}						Thrown if '.route' or '.element' is missing in
@@ -102,6 +101,3 @@ module.exports.RouteParser = require('./routeParser');
 module.exports.RouterRoute = require('./routerRoute');
 module.exports.server = { createRouter, createApp };
 module.exports.client = { renderRoute };
-module.exports.makeApiFunctionHandler = routeToRouter.makeApiFunctionHandler;
-module.exports.makeApiRouterHandler = routeToRouter.makeApiRouterHandler;
-module.exports.makeStaticFileHandler = routeToRouter.makeStaticFileHandler;

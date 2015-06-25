@@ -4,12 +4,14 @@
 	"description": "A example of how to use react-router-server.",
 	"author": "Nick Heyn <nick@heyn.io>",
 	"dependencies": {
-		"babel": "*",
 		"browserify": "*",
 		"react": "*",
 		"react-router": "*",
 		"express": "*",
 		"react-router-server": "file:/lib/react-router-server/"
+	},
+	"devDependencies": {
+		"babel": "*"
 	},
 	"scripts": {
 		"prepublish": "babel ./src/ -d ./lib/"

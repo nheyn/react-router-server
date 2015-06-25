@@ -1,3 +1,5 @@
+require('babel/polyfill');
+
 var { client } = require('react-router-server');
 var exampleRoute = require('./route');
 

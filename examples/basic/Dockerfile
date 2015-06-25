@@ -3,10 +3,11 @@ FROM nheyn/react-router-server:dev
 WORKDIR /var/www/
 
 ### FOR SPEED ###
-RUN npm install babel
-RUN npm install react
-RUN npm install react-router
-RUN npm install express
+#RUN npm install babel
+#RUN npm install browserify
+#RUN npm install react
+#RUN npm install react-router
+#RUN npm install express
 ### FOR SPEED ###
 
 COPY ./src /var/www/src/

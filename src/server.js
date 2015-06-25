@@ -26,7 +26,7 @@ class ReactRouterServer {
 	 */
 	constructor(route: ReactRouterRoute, initialCallback?: ?ExpressCallback) {
 		this._parseRoute(route);
-		
+
 		if(initialCallback)	this._setInitialCallback(initialCallback);
 	}
 
@@ -40,7 +40,7 @@ class ReactRouterServer {
 	 */
 	getRouter(): ExpressRouter {
 		if(!this._router) this._router = this._createRouter();
-		
+
 		return this._router;
 	}
 
@@ -97,9 +97,9 @@ class ReactRouterServer {
 		var router = express.Router();
 
 		router.use(this._initialCallback);
-		router.use(this._handleInitialPageLoad);		
+		router.use((req, res, next) => this._handleInitialPageLoad(req, res, next));
 		router.use(this._httpRouter);
-		router.use(this._handleError);
+		router.use((req, res, next) => this._handleError(req, res, next));
 
 		return router;
 	}
@@ -111,7 +111,7 @@ class ReactRouterServer {
 		// Get inputs, can be set in this._initialCallback
 		var props = req.server.props? req.server.props: {}
 		var context = req.server.context? req.server.context: {};
-		var htmlTemplate = req.sever.htmlTemplate? req.server.htmlTemplate: '<react />';
+		var htmlTemplate = req.server.htmlTemplate? req.server.htmlTemplate: '<react />';
 
 		// Render / Send the the current React Route
 		AsyncRouter.run(this._route, req.url, (Handler, state) => {
@@ -119,7 +119,6 @@ class ReactRouterServer {
 				.then((reactHtml) => {
 					// Add rendered react element to html template
 					var htmlDoc = htmlTemplate.replace('<react />', reactHtml);
-					
 					// Send Rendered Page
 					res.status('200');
 					res.type('html');
@@ -134,6 +133,7 @@ class ReactRouterServer {
 
 	_handleError(req: ExpressReq, res: ExpressRes) {
 		//TODO, change error handling based on error
+		console.error('Error Durring Request:', req.server.error);
 		res.status(500);
 		res.json({
 			errors: [req.server.error.message? req.server.error.message: 'Unknown Error']

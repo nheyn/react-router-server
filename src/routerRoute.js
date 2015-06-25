@@ -12,6 +12,24 @@ var express = require('express');
  * A React class, that can be use instead of React Router's Route class, that can
  */
 var RouterRoute = React.createClass({
+	statics: {
+		hasRouter: true,
+		getRouter(props: {[key: string]: any}): ExpressRouter {
+			if(props.router)		return props.router;
+			else if(props.callback)	return this.getRouterFromCallback(props.callback);
+			else if(props.src)		return this.getRouterFromSrc(props.src);
+
+			throw new Error("RouterRoute must have 'callback', 'router' or 'src' prop.");
+		},
+		getRouterFromCallback(callback: ExpressCallback): ExpressRouter {
+			var router = express.Router();
+			router.use(callback);
+			return router;
+		},
+		getRouterFromSrc(src: string): ExpressRouter {
+			return express.static(src);
+		}
+	},
 	propTypes: {
 		name: React.PropTypes.string,
 		path: React.PropTypes.string,
@@ -21,28 +39,6 @@ var RouterRoute = React.createClass({
 	},
 	render(): ReactElement {
 		throw new Error('RouterRoute should never be rendered');
-	},
-	getRouter(): ExpressRouter {
-		if(this.props.router) {
-			return this.props.router;
-		}
-		else if(this.props.callback) {
-			return this.getRouterFromCallback(this.props.callback);
-		}
-		else if(this.props.src) {
-			return this.getRouterFromSrc(this.props.src);
-		}
-		else {
-			throw new Error("RouterRoute must have 'callback', 'router' or 'src' prop.");
-		}
-	},
-	getRouterFromCallback(callback: ExpressCallback): ExpressRouter {
-		var router = express.Router();
-		router.use(callback);
-		return router;
-	},
-	getRouterFromSrc(src: string): ExpressRouter {
-		return express.static(src);
 	}
 });
 

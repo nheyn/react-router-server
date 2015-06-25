@@ -1,6 +1,7 @@
 /**
  * @flow
  */
+var path = require('path');
 var React = require('react');
 
 type RouteFilter = (route: ReactRouterRoute) => bool;
@@ -41,7 +42,7 @@ class RouteParser {
 		return React.cloneElement(
 			this._route,
 			{},
-			this._filterRoutesChildren((route) => !isRouterRoute(route))
+			this._filterRoutesChildren(dosentHaveExpressRouter)
 		);
 	}
 
@@ -53,10 +54,10 @@ class RouteParser {
 	 *										router	{ExpressRouter}
 	 */
 	getExpressRouters(): Array<RouterAndPath> {
-		return this._flattenRoutesFilteredChildren(isRouterRoute).map((route) => {
+		return this._flattenAndFilteredChildren(hasExpressRouter).map((route) => {
 			return {
-				path: this._getPathOf(route),
-				router: this._getRouterFrom(route)
+				path: getPathOf(route),
+				router: getRouterFrom(route)
 			};
 		});
 	}
@@ -70,14 +71,14 @@ class RouteParser {
 		var filteredChildren = [];
 		React.Children.forEach(children, (child, i) => {
 			// Filter children and their children by should keep
-			if(typeof child !== 'string' && shouldKeep(child)) {
+			if(shouldKeep(child)) {
 				filteredChildren.push(
 					React.cloneElement(
 						child,
 						{key: i},
-						React.Children.count(child.props.children) === 0?
-							null:
-							this._filterChildren(child.props.children, shouldKeep)
+						child.props.children?
+							this._filterChildren(child.props.children, shouldKeep):
+							null
 					)
 				);
 			}
@@ -89,7 +90,7 @@ class RouteParser {
 		return this._filterChildren(this._route.props.children, shouldKeep);
 	}
 
-	_flattenRoutesFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
+	_flattenAndFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
 		return this._flattenRoutes(this._filterRoutesChildren(shouldKeep));
 	}
 
@@ -100,37 +101,42 @@ class RouteParser {
 		var flattener = (currRoutes, prefix) => {
 			//NOTE, Not using React.Children.map because github.com/facebook/react/issues/2872
 			React.Children.forEach(currRoutes, (route) => {
-				var path = `${(prefix === ''? '': prefix+'/')}${this._getPathOf(route)}`;
+				var currPath = getPathOf(route, prefix);
 
-				flattenedRoutes.push(React.cloneElement(route, { path }));
-				if(route.props.children) flattener(route.props.children, path);
+				flattenedRoutes.push(React.cloneElement(route, { path: currPath }));
+				if(route.props.children) flattener(route.props.children, currPath);
 			});
 		};
-		flattener(routes, this._getPathOf(this._route));
+		flattener(routes, getPathOf(this._route));
 
 		return flattenedRoutes;
-	}
-
-	_getPathOf(route: ReactRouterRoute): string {
-		return route.props.path? route.props.path: (route.props.name? route.props.name: '');
-	}
-
-	_getRouterFrom(route: ReactRouterRoute): ExpressRouter {
-		if(!isRouterRoute(route)) {
-			throw new Error("Routes passed to 'RouteParser._getRouterFrom' must have 'getRouter'.");
-		}
-
-		var _route: any = route;	//NOTE, for flowtype
-		return _route.getRouter();
 	}
 }
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Helper function ---
 /*------------------------------------------------------------------------------------------------*/
-function isRouterRoute(route: ReactRouterRoute): bool {
-	var _route: any = route;	//NOTE, for flowtype
-	return _route.getRouter? true: false;
+function hasExpressRouter(route: ReactRouterRoute): bool {
+	return route.type.hasRouter;
+}
+
+function dosentHaveExpressRouter(route: ReactRouterRoute): bool {
+	return !hasExpressRouter(route);
+}
+
+function getPathOf(route: ReactRouterRoute, prefix?: string): string {
+	return path.join(
+		prefix? prefix: '',
+		route.props.path? route.props.path: (route.props.name? route.props.name: '')
+	);
+}
+
+function getRouterFrom(route: ReactRouterRoute): ExpressRouter {
+	if(dosentHaveExpressRouter(route)) {
+		throw new Error("Routes passed to 'RouteParser._getRouterFrom' must have 'getRouter'.");
+	}
+
+	return route.type.getRouter(route.props);
 }
 
 /*------------------------------------------------------------------------------------------------*/

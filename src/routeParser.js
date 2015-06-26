@@ -2,6 +2,7 @@
  * @flow
  */
 var path = require('path');
+var express = require('express');
 var React = require('react');
 
 type RouteFilter = (route: ReactRouterRoute) => bool;
@@ -47,19 +48,19 @@ class RouteParser {
 	}
 
 	/**
-	 * Gets the express routers defined in the react router Route.
+	 * Gets the express router defined in the react router Route.
 	 *
-	 * @return	{Array<RouterAndPath>}	An array of the express routes in the object in the form:
-	 *										path 	{string}
-	 *										router	{ExpressRouter}
+	 * @return	{ExpressRouter}		The router that handles all non page load requests
 	 */
-	getExpressRouters(): Array<RouterAndPath> {
-		return this._flattenAndFilteredChildren(hasExpressRouter).map((route) => {
-			return {
-				path: getPathOf(route),
-				router: getRouterFrom(route)
-			};
-		});
+	getExpressRouter(): ExpressRouter {
+		var router = express.Router();
+		this._getExpressRouters().forEach(
+			(routerSettings) => {
+				console.log(routerSettings);
+				router.use(routerSettings.path, routerSettings.router);
+			}
+		);
+		return router;
 	}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -111,6 +112,15 @@ class RouteParser {
 
 		return flattenedRoutes;
 	}
+
+	_getExpressRouters(): Array<RouterAndPath> {
+		return this._flattenAndFilteredChildren(hasExpressRouter).map((route) => {
+			return {
+				path: getPathOf(route),
+				router: getRouterFrom(route)
+			};
+		});
+	}
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -126,7 +136,7 @@ function dosentHaveExpressRouter(route: ReactRouterRoute): bool {
 
 function getPathOf(route: ReactRouterRoute, prefix?: string): string {
 	return path.join(
-		prefix? prefix: '',
+		prefix? prefix: '/',
 		route.props.path? route.props.path: (route.props.name? route.props.name: '')
 	);
 }

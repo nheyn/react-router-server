@@ -26,8 +26,7 @@ class ReactRouterServer {
 	 */
 	constructor(route: ReactRouterRoute, initialCallback?: ?ExpressCallback) {
 		this._parseRoute(route);
-
-		if(initialCallback)	this._setInitialCallback(initialCallback);
+		this._setInitialCallback(initialCallback);
 	}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -68,17 +67,21 @@ class ReactRouterServer {
 		});
 	}
 
-	_setInitialCallback(callback: ExpressCallback) {
+	_setInitialCallback(callback: ?ExpressCallback) {
 		this._initialCallback = (req, res, next) => {
 			// Set up store for server data for this request
 			req.server = {};
 
 			// Call next callback
-			try{
-				callback(req, res, next);
+			if(callback) {
+				try{
+					callback(req, res, next);
+				}
+				catch(err) {
+					next(err);
+				}
 			}
-			catch(err) {
-				req.server.error = err;
+			else {
 				next();
 			}
 		};
@@ -97,17 +100,14 @@ class ReactRouterServer {
 		var router = express.Router();
 
 		router.use(this._initialCallback);
-		router.use((req, res, next) => this._handleInitialPageLoad(req, res, next));
 		router.use(this._httpRouter);
-		router.use((req, res, next) => this._handleError(req, res, next));
+		router.use((req, res, next) => this._handleInitialPageLoad(req, res, next));
+		router.use((err, req, res, next) => this._handleError(err, req, res, next));
 
 		return router;
 	}
 
 	_handleInitialPageLoad(req: ExpressReq, res: ExpressRes, next: () => void) {
-		// Skip if error has already occurred
-		if(req.server.error) next();
-
 		// Get inputs, can be set in this._initialCallback
 		var props = req.server.props? req.server.props: {}
 		var context = req.server.context? req.server.context: {};
@@ -125,18 +125,17 @@ class ReactRouterServer {
 					res.send(htmlDoc);
 				})
 				.catch((err) => {
-					req.server.error = err;
-					next();
+					next(err);
 				});
-		});
+		})
 	}
 
-	_handleError(req: ExpressReq, res: ExpressRes) {
+	_handleError(err: Error, req: ExpressReq, res: ExpressRes) {
 		//TODO, change error handling based on error
-		console.error('Error Durring Request:', req.server.error);
+		console.error('Error Durring Request:', err);
 		res.status(500);
 		res.json({
-			errors: [req.server.error.message? req.server.error.message: 'Unknown Error']
+			errors: [err.message? err.message: 'Unknown Error']
 		});
 	}
 }

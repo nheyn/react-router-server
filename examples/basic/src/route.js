@@ -1,3 +1,4 @@
+var path = require('path');
 var express = require('express');
 var React = require('react');
 var { DefaultRoute, Route, RouteHandler } = require('react-router');
@@ -13,13 +14,18 @@ var SubPageOne = 	React.createClass({ render() { return <div>SubPageOne</div>; }
 var SubPageTwo = 	React.createClass({ render() { return <div>SubPageTwo</div>; } });	//TODO
 
 /*------------------------------------------------------------------------------------------------*/
-//	--- Router Router / Func ---
+//	--- Router Router / Func / Files---
 /*------------------------------------------------------------------------------------------------*/
-var func = (req, res) => res.json(
-	{'error': ['NYI']}					//TODO
-);
+var func = (req, res) => {
+	console.log('func called');
+	res.json({'error': ['NYI']});					//TODO
+};
 var router = express.Router(); 			//TODO
 router.use(func);
+
+var faviconSrc = path.join(__dirname, '../staticFiles/favicon.ico');
+var appSrc = path.join(__dirname, '../staticFiles/app.js');
+var filesSrc = path.join(__dirname, '../staticFiles/');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Create Route ---
@@ -32,9 +38,9 @@ var route = (
 			<Route name="subPageTwo" handler={SubPageTwo} />
 			<RouterRoute name="indenticon.png" src="../staticFiles/indenticon.png" />
 		</Route>
-		<RouterRoute name="favicon.ico" src="../staticFiles/favicon.ico" />
-		<RouterRoute name="app.js" src="../app.js" />
-		<RouterRoute name="files" src="../staticFiles/" />
+		<RouterRoute name="favicon.ico" src={faviconSrc} />
+		<RouterRoute name="app.js" src={appSrc} />
+		<RouterRoute name="files" src={filesSrc} />
 		<RouterRoute name="func" callback={func} />
 		<RouterRoute name="router" router={router} />
 	</Route>

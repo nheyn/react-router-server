@@ -3,6 +3,7 @@ FROM nheyn/async-react-router:0.2.0
 WORKDIR /lib/react-router-server/
 
 ### FOR SPEED ###
+RUN npm install -g babel
 RUN npm install babel
 RUN npm install express
 RUN npm install react

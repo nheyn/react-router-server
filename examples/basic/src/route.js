@@ -24,7 +24,7 @@ var router = express.Router(); 			//TODO
 router.use(func);
 
 var faviconSrc = path.join(__dirname, '../staticFiles/favicon.ico');
-var appSrc = path.join(__dirname, '../staticFiles/app.js');
+var appSrc = path.join(__dirname, '../app.js');
 var filesSrc = path.join(__dirname, '../staticFiles/');
 
 /*------------------------------------------------------------------------------------------------*/

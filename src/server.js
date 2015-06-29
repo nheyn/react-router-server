@@ -13,6 +13,7 @@ var RouteParser = require('./routeParser');
 class ReactRouterServer {
 	_route: ReactRouterRoute;
 	_httpRouter: ExpressRouter;
+	_staticSettings: Object;
 	_initialCallback: ExpressCallback;
 	_router: ExpressRouter;
 	_app: ExpressApp;
@@ -23,10 +24,14 @@ class ReactRouterServer {
 	 *
 	 * @param route				{ReactRouterRoute}	The route for this server
 	 * @param [initialCallback]	{?ExpressCallback}	The first callback to call for this server
+	 * @param [staticSettings]	{?Object}			The settings to put in req.server on every
+	 *												request
 	 */
-	constructor(route: ReactRouterRoute, initialCallback?: ?ExpressCallback) {
+	constructor(	route: ReactRouterRoute,
+					initialCallback?: ?ExpressCallback,
+					staticSettings?: ?Object			) {
 		this._parseRoute(route);
-		this._setInitialCallback(initialCallback);
+		this._setInitialCallback(initialCallback, staticSettings);
 	}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -65,10 +70,10 @@ class ReactRouterServer {
 		this._httpRouter = parser.getExpressRouter();
 	}
 
-	_setInitialCallback(callback: ?ExpressCallback) {
+	_setInitialCallback(callback: ?ExpressCallback, staticSettings: ?Object = {}) {
 		this._initialCallback = (req, res, next) => {
 			// Set up store for server data for this request
-			req.server = {};
+			req.server = Object.assign({}, staticSettings);
 
 			// Call next callback
 			if(callback) {

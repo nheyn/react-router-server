@@ -6,6 +6,7 @@ var ReactRouterClient = require('./client');
 
 type SeverSettingsType = {
 	route: ReactRouterRoute;
+	staticSettings?: Object;
 	initialCallback?: ExpressCallback;
 };
 
@@ -30,6 +31,8 @@ type ClientSettingsType = {
  *
  * @param settings			{Object}				The settings for the server
  *			route				{ReactRouterRoute}		The route for this server
+*			[staticSettings]	{Object}				The settings to put in req.server on every
+*														request
  *			[initialCallback]	{ExpressCallback}		The first callback to call for this server
  *
  * @throws 					{Error}					Thrown if '.route' is missing in the settings
@@ -38,10 +41,7 @@ type ClientSettingsType = {
  * @return					{ExpressRouter}			The router for this server
  */
 function createRouter(settings: SeverSettingsType): ExpressRouter {
-	if(!settings.route) throw new Error("The 'createRouter()' settings must include '.route'");
-
-	var server = new ReactRouterServer(settings.route, settings.initialCallback);
-	return server.getRouter();
+	return createServer(settings).getRouter();
 }
 
 /**
@@ -57,10 +57,7 @@ function createRouter(settings: SeverSettingsType): ExpressRouter {
  * @return	{ExpressApp}	The app for this server
  */
 function createApp(settings: SeverSettingsType): ExpressApp {
-	if(!settings.route) throw new Error("The 'createApp()' settings must include '.route'");
-
-	var server = new ReactRouterServer(settings.route, settings.initialCallback);
-	return server.getApp();
+	return createServer(settings).getApp();
 }
 
 /**
@@ -83,15 +80,35 @@ function createApp(settings: SeverSettingsType): ExpressApp {
  * @return				{Promise<ReactComponent>}	The rendered react component in a Promise
  */
 function renderRoute(settings: ClientSettingsType): Promise<ReactComponent> {
-	if(!settings.route) {
-		throw new Error("The 'renderRoute()' settings must include '.route'");
-	}
 	if(!settings.element) {
 		throw new Error("The 'renderRoute()' settings must include '.element'");
 	}
 
-	var client = new ReactRouterClient(settings.route, settings.getProps, settings.getContext);
+	var client = createClient(settings);
 	return client.renderApp(settings.element);
+}
+
+/*------------------------------------------------------------------------------------------------*/
+//	--- Helper Functions ---
+/*------------------------------------------------------------------------------------------------*/
+function createServer(settings: SeverSettingsType): ReactRouterServer {
+	if(!settings.route) {
+		throw new Error("The 'createRouter()' and 'createApp()' settings must include '.route'");
+	}
+
+	return new ReactRouterServer(
+		settings.route,
+		settings.initialCallback,
+		settings.staticSettings
+	);
+}
+
+function createClient(settings: ClientSettingsType): ReactRouterClient {
+	if(!settings.route) {
+		throw new Error("The 'renderRoute()' settings must include '.route'");
+	}
+
+	return new ReactRouterClient(settings.route, settings.getProps, settings.getContext);
 }
 
 /*------------------------------------------------------------------------------------------------*/

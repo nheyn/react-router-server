@@ -1,11 +1,13 @@
 require('babel/polyfill');
 
+var React = require('react');
 var { client } = require('react-router-server');
 var exampleRoute = require('./route');
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- Create Client ---
 /*------------------------------------------------------------------------------------------------*/
+window.React = React;
 window.onload = () => {
 	client.renderRoute({
 		route: exampleRoute,

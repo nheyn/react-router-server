@@ -5,6 +5,7 @@ var browserify = require('browserify');
 var b = browserify('./lib/client.js');
 
 //NOTE, ignore any javascript that should not be sent to the client
+b.ignore('express');
 
 b.bundle().pipe(
 	fs.createWriteStream('app.js', { flags : 'w' })

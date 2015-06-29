@@ -4,12 +4,9 @@
 var path = require('path');
 var express = require('express');
 var React = require('react');
+var { NotFoundRoute } = require('react-router');
 
 type RouteFilter = (route: ReactRouterRoute) => bool;
-type RouterAndPath = {
-	path: string;
-	router: ExpressRouter;
-};
 
 /*------------------------------------------------------------------------------------------------*/
 //	--- RouteParser ---
@@ -43,7 +40,7 @@ class RouteParser {
 		return React.cloneElement(
 			this._route,
 			{},
-			this._filterRoutesChildren(dosentHaveExpressRouter)
+			this._getReactRouterRoutesChildren()
 		);
 	}
 
@@ -56,7 +53,6 @@ class RouteParser {
 		var router = express.Router();
 		this._getExpressRouters().forEach(
 			(routerSettings) => {
-				console.log(routerSettings);
 				router.use(routerSettings.path, routerSettings.router);
 			}
 		);
@@ -66,60 +62,41 @@ class RouteParser {
 /*------------------------------------------------------------------------------------------------*/
 //	Private Methods
 /*------------------------------------------------------------------------------------------------*/
-	_filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
-																		: Array<ReactRouterRoute> {
-		//NOTE, Should use React.Children.filter, but github.com/facebook/react/issues/2956
-		var filteredChildren = [];
-		React.Children.forEach(children, (child, i) => {
-			// Filter children and their children by should keep
-			if(shouldKeep(child)) {
-				filteredChildren.push(
-					React.cloneElement(
-						child,
-						{key: i},
-						child.props.children?
-							this._filterChildren(child.props.children, shouldKeep):
-							null
-					)
-				);
+	_getExpressRouters(): Array<{ path: string; router: ExpressRouter; }> {
+		return this._flattenAndFilteredChildren(hasExpressRouterRecursive)
+				.filter(hasExpressRouter)
+				.map((route) => {
+					return {
+						path: getPathOf(route),
+						router: getRouterFrom(route)
+					};
+				});
+	}
+
+	_getReactRouterRoutesChildren(): Array<ReactRouterRoute> {
+		// Make the 404 route
+		var MissingPageHandler = React.createClass({
+			render(): ReactElement {
+				throw new Error('404: Page Not Found');
 			}
 		});
-		return filteredChildren;
+
+		// Get filtered childrend with added 404 route
+		var children = this._filterRoutesChildren(doesntHaveExpressRouter);
+		children.push(<NotFoundRoute key={children.length} handler={MissingPageHandler} />);
+
+		return children;
 	}
 
 	_filterRoutesChildren(shouldKeep: RouteFilter): Array<ReactRouterRoute> {
-		return this._filterChildren(this._route.props.children, shouldKeep);
+		return filterChildren(this._route.props.children, shouldKeep);
 	}
 
 	_flattenAndFilteredChildren(shouldKeep: RouteFilter) : Array<ReactRouterRoute> {
-		return this._flattenRoutes(this._filterRoutesChildren(shouldKeep));
-	}
-
-	_flattenRoutes(routes: Array<ReactRouterRoute>): Array<ReactRouterRoute> {
-		if(routes.length === 0) return [];
-
-		var flattenedRoutes = [];
-		var flattener = (currRoutes, prefix) => {
-			//NOTE, Not using React.Children.map because github.com/facebook/react/issues/2872
-			React.Children.forEach(currRoutes, (route) => {
-				var currPath = getPathOf(route, prefix);
-
-				flattenedRoutes.push(React.cloneElement(route, { path: currPath }));
-				if(route.props.children) flattener(route.props.children, currPath);
-			});
-		};
-		flattener(routes, getPathOf(this._route));
-
-		return flattenedRoutes;
-	}
-
-	_getExpressRouters(): Array<RouterAndPath> {
-		return this._flattenAndFilteredChildren(hasExpressRouter).map((route) => {
-			return {
-				path: getPathOf(route),
-				router: getRouterFrom(route)
-			};
-		});
+		return flattenRoutes(
+			getPathOf(this._route),
+			this._filterRoutesChildren(shouldKeep)
+		);
 	}
 }
 
@@ -127,11 +104,63 @@ class RouteParser {
 //	--- Helper function ---
 /*------------------------------------------------------------------------------------------------*/
 function hasExpressRouter(route: ReactRouterRoute): bool {
-	return route.type.hasRouter;
+	return route.type.hasRouter? true: false;
 }
 
-function dosentHaveExpressRouter(route: ReactRouterRoute): bool {
+function doesntHaveExpressRouter(route: ReactRouterRoute): bool {
 	return !hasExpressRouter(route);
+}
+
+function hasExpressRouterRecursive(route: ReactRouterRoute): bool {
+	if(hasExpressRouter(route)) return true;
+	if(!route.props.children) return false;
+
+	// Check if any child has router
+	var numberOfChildrenWithRouter = filterChildren(
+		route.props.children,
+		hasExpressRouterRecursive
+	).length;
+	return numberOfChildrenWithRouter > 0;
+}
+
+function filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
+																		: Array<ReactRouterRoute> {
+	//NOTE, Should use React.Children.filter, but github.com/facebook/react/issues/2956
+	var filteredChildren = [];
+	React.Children.forEach(children, (child, i) => {
+		// Filter children and their children by should keep
+		if(shouldKeep(child)) {
+			filteredChildren.push(
+				React.cloneElement(
+					child,
+					{key: i},
+					child.props.children?
+						filterChildren(child.props.children, shouldKeep):
+						null
+				)
+			);
+		}
+	});
+	return filteredChildren;
+}
+
+function flattenRoutes(startPath: string, routes: Array<ReactRouterRoute>)
+																		: Array<ReactRouterRoute> {
+	if(routes.length === 0) return [];
+
+	var flattenedRoutes = [];
+	var flattener = (currRoutes, prefix) => {
+		//NOTE, Not using React.Children.map because github.com/facebook/react/issues/2872
+		React.Children.forEach(currRoutes, (route) => {
+			var currPath = getPathOf(route, prefix);
+
+			flattenedRoutes.push(React.cloneElement(route, { path: currPath }));
+			if(route.props.children) flattener(route.props.children, currPath);
+		});
+	};
+	flattener(routes, startPath);
+
+	return flattenedRoutes;
 }
 
 function getPathOf(route: ReactRouterRoute, prefix?: string): string {
@@ -142,8 +171,8 @@ function getPathOf(route: ReactRouterRoute, prefix?: string): string {
 }
 
 function getRouterFrom(route: ReactRouterRoute): ExpressRouter {
-	if(dosentHaveExpressRouter(route)) {
-		throw new Error("Routes passed to 'RouteParser._getRouterFrom' must have 'getRouter'.");
+	if(doesntHaveExpressRouter(route)) {
+		throw new Error("Routes passed to 'getRouterFrom' must have 'getRouter'.");
 	}
 
 	return route.type.getRouter(route.props);

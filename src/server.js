@@ -60,11 +60,9 @@ class ReactRouterServer {
 	_parseRoute(route: ReactRouterRoute) {
 		var parser = new RouteParser(route);
 
+		// Get parts or the route
 		this._route = parser.getReactRouterRoute();
-		this._httpRouter = express.Router();
-		parser.getExpressRouters().forEach((routerSettings) => {
-			this._httpRouter.use(routerSettings.path, routerSettings.router);
-		});
+		this._httpRouter = parser.getExpressRouter();
 	}
 
 	_setInitialCallback(callback: ?ExpressCallback) {
@@ -91,7 +89,7 @@ class ReactRouterServer {
 		var _express: any = express;	//NOTE, for flowtype
 		var app = _express();
 
-		app.use(this.getRouter());
+		app.use('/', this.getRouter());
 
 		return app;
 	}
@@ -99,44 +97,49 @@ class ReactRouterServer {
 	_createRouter(): ExpressRouter {
 		var router = express.Router();
 
-		router.use(this._initialCallback);
-		router.use(this._httpRouter);
-		router.use((req, res, next) => this._handleInitialPageLoad(req, res, next));
-		router.use((err, req, res, next) => this._handleError(err, req, res, next));
+		router.use(this._initialCallback);				// Callback for constructor
+		router.use(this._httpRouter);					// Express routers for (non-html) http reqs
+		router.use(this._getHandleInitialPageLoad());	// Callback for react server side rendering
+		router.use(this._getHandleError());				// Callback for error handling
 
 		return router;
 	}
 
-	_handleInitialPageLoad(req: ExpressReq, res: ExpressRes, next: () => void) {
-		// Get inputs, can be set in this._initialCallback
-		var props = req.server.props? req.server.props: {}
-		var context = req.server.context? req.server.context: {};
-		var htmlTemplate = req.server.htmlTemplate? req.server.htmlTemplate: '<react />';
+	_getHandleInitialPageLoad(): ExpressCallback {
+		return (req, res, next) => {
+			// Get inputs, can be set in this._initialCallback
+			var props = req.server.props? req.server.props: {}
+			var context = req.server.context? req.server.context: {};
+			var htmlTemplate = req.server.htmlTemplate? req.server.htmlTemplate: '<react />';
 
-		// Render / Send the the current React Route
-		AsyncRouter.run(this._route, req.url, (Handler, state) => {
-			AsyncReact.renderToString(<Handler {...props} />, context)
-				.then((reactHtml) => {
-					// Add rendered react element to html template
-					var htmlDoc = htmlTemplate.replace('<react />', reactHtml);
-					// Send Rendered Page
-					res.status('200');
-					res.type('html');
-					res.send(htmlDoc);
-				})
-				.catch((err) => {
-					next(err);
-				});
-		})
+			// Render / Send the the current React Route
+			AsyncRouter.run(this._route, req.url, (Handler, state) => {
+				AsyncReact.renderToString(<Handler {...props} />, context)
+					.then((reactHtml) => {
+						// Add rendered react element to html template
+						var htmlDoc = htmlTemplate.replace('<react />', reactHtml);
+
+						// Send Rendered Page
+						res.status('200');
+						res.type('html');
+						res.send(htmlDoc);
+					})
+					.catch((err) => {
+						next(err);
+					});
+			});
+		};
 	}
 
-	_handleError(err: Error, req: ExpressReq, res: ExpressRes) {
-		//TODO, change error handling based on error
-		console.error('Error Durring Request:', err);
-		res.status(500);
-		res.json({
-			errors: [err.message? err.message: 'Unknown Error']
-		});
+	_getHandleError(): ExpressErrorCallback {
+		return (err, req, res, next) => {
+			//TODO, change error handling based on error
+			console.error('Error Durring Request:', err);
+			res.status(500);
+			res.json({
+				errors: [err.message? err.message: 'Unknown Error']
+			});
+		};
 	}
 }
 

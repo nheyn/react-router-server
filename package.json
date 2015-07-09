@@ -5,7 +5,7 @@
   "author": "Nick Heyn <nick@heyn.io>",
   "main": "./lib/index.js",
   "dependencies": {
-    "async-react-router": "file:/var/async-react-router",
+    "async-react-router": "file:/lib/async-react-router",
     "babel": "*",
     "express": "*",
     "react": "*",

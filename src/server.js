@@ -139,7 +139,7 @@ class ReactRouterServer {
 	_getHandleError(): ExpressErrorCallback {
 		return (err, req, res, next) => {
 			//TODO, change error handling based on error
-			console.error('Error Durring Request:', err);
+			console.error('Error Durring Request:', err, err.stack);
 			res.status(500);
 			res.json({
 				errors: [err.message? err.message: 'Unknown Error']

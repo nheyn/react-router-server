@@ -30,8 +30,8 @@ class ReactRouterClient {
 					getContext?: ?GetMaybePromise	) {
 		this._parseRoute(route);
 
-		if(getProps)	this._getProps = wrapMaybePromiseFunction(getProps);
-		if(getContext)	this._getContext = wrapMaybePromiseFunction(getContext);
+		this._getProps = wrapMaybePromiseFunction(getProps);
+		this._getContext = wrapMaybePromiseFunction(getContext);
 	}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -82,8 +82,8 @@ class ReactRouterClient {
 /*------------------------------------------------------------------------------------------------*/
 //	Helper functions
 /*------------------------------------------------------------------------------------------------*/
-function wrapMaybePromiseFunction<T>(func: GetMaybePromise<T>): () => Promise<T> {
-	return  () => Promise.resolve(func());
+function wrapMaybePromiseFunction<T>(func?: ?GetMaybePromise<T>): () => ?Promise<T> {
+	return () => func? Promise.resolve(func()): null;
 }
 
 /*------------------------------------------------------------------------------------------------*/

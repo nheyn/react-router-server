@@ -128,6 +128,9 @@ function filterChildren(children: ReactRouterChildren, shouldKeep: RouteFilter)
 	//NOTE, Should use React.Children.filter, but github.com/facebook/react/issues/2956
 	var filteredChildren = [];
 	React.Children.forEach(children, (child, i) => {
+		// Don't include null children
+		if(!child) return;
+
 		// Filter children and their children by should keep
 		if(shouldKeep(child)) {
 			filteredChildren.push(

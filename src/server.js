@@ -53,10 +53,10 @@ class ReactRouterServer {
 	 *
 	 * @return	{ExpressApp}	The app for this server
 	 */
-	 getApp(): ExpressApp {
-	 	if(!this._app) this._app = this._createApp();
+	getApp(): ExpressApp {
+		if(!this._app) this._app = this._createApp();
 
-	 	return this._app;
+		return this._app;
 	 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -139,7 +139,7 @@ class ReactRouterServer {
 	_getHandleError(): ExpressErrorCallback {
 		return (err, req, res, next) => {
 			//TODO, change error handling based on error
-			console.error('Error Durring Request:', err, err.stack);
+			console.error('Error Durring Request [', req.url ,']:', err.stack);
 			res.status(500);
 			res.json({
 				errors: [err.message? err.message: 'Unknown Error']

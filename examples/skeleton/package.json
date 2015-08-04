@@ -1,8 +1,8 @@
 {
-	"name": "react-router-server-basic-example",
+	"name": "react-router-server-skeleton",
 	"version": "0.1.0",
-	"description": "A example of how to use react-router-server.",
-	"author": "Nick Heyn <nick@heyn.io>",
+	"description": "Project description",
+	"author": "Author <author@example.com>",
 	"dependencies": {
 		"babel": "*",
 		"browserify": "*",

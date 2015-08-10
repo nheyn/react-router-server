@@ -11,7 +11,7 @@ window.React = React;
 window.onload = () => {
 	client.renderRoute({
 		route: createRoute(),
-		element: window.getElementById('react'),
+		element: window.document.getElementById('react'),
 		getProps: function() {
 			//TODO
 			return null;

@@ -17,8 +17,8 @@ RouterServer.server.createApp({
 		)
 	},
 	initialCallback(req, res, next) {
-		//TODO, set props
-		//TODO, set context
+		//TODO, set req.server.props
+		//TODO, set req.server.context
 		next();
 	}
 }).listen(80);

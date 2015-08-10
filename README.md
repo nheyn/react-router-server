@@ -1,4 +1,4 @@
-#React Router Server
+# React Router Server
 *A http server for isomorphic React Router Applications*
 
 A http server that uses [express][0], [react][1] and [react-router][2] to create isomorphic web sites/applications.
@@ -7,12 +7,12 @@ A http server that uses [express][0], [react][1] and [react-router][2] to create
 [1]: http://facebook.github.io/react/
 [2]: http://rackt.github.io/react-router/
 
-###Features
+### Features
 * The structure of the site is defined in a reat-router route
 * Non-html http request use express routers/callbacks
 * Server-side rendering, including asynchronous initial state for react-router handlers (see https://github.com/nheyn/async-react-router)
 
-###Usage
+### Usage
 To use react-router-server
 
 * Copy skeleton project from /examples/skeleton
@@ -21,23 +21,23 @@ To use react-router-server
 * And props and context to the top level react-router handler using
   * CLIENT: update getProps and getContext functions in /src/client.js
   * SERVER: add .props and .context to req.server in the initialCallback function in /src/server.js
-* Add express routers/callbacks by adding *<RouterRoute name="<uri>" callback={<express callback>} />* or *<RouterRoute name="<uri>" router={<express router>} />* to the route in src/route.js (see http://expressjs.com/4x/api.html)
+* Add express routers/callbacks by adding *\<RouterRoute name="URI" callback={EXPRESS_CALLBACK} />* or *<RouterRoute name="URI" router={EXPRESS_ROUTER} /\>* to the route in src/route.js (see http://expressjs.com/4x/api.html)
 * Add static files by adding files/directories to /public
-  * The can be found at example.com/public/<file path>
-  * A diffrent url can be chosen by adding *<RouterRoute name="<file name>" src={<file path>} />* to the route in src/route.js
+  * The can be found at example.com/public/FILE_PATH
+  * A diffrent url can be chosen by adding *\<RouterRoute name="FILE_NAME" src={FILE_PATH} /\>* to the route in src/route.js
 * Add css or javascript files to /public/template.html
 * Run index.js file to start server
 
-###Example
+### Example
 A basic example is in /examples/basic. Run /examples/basic/index.js to start the example server.
 
-###Tests
+### Tests
 TODO: Update tests for new route parser
 
-###Documentation
+### Documentation
 Detailed documentation is included in the code.
 
-###Plans
+### Plans
 * Update tests for new route parser
 * Get documentation from code
 * Update template.html to use a templates engine (see http://expressjs.com/guide/using-template-engines.html)

@@ -1,3 +1,6 @@
+**NOTE**
+*This project is no longer supported, see [express-react-router](https://github.com/nheyn/express-react-router) for the similar features*
+
 # React Router Server
 *A http server for isomorphic React Router Applications*
 

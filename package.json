@@ -9,7 +9,7 @@
     "babel": "*",
     "express": "*",
     "react": "*",
-    "react-router": "*"
+    "react-router": "0.13.x"
   },
   "devDependencies": {
     "babel-jest": "*",
